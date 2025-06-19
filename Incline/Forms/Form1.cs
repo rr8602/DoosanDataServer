@@ -1,6 +1,8 @@
 ﻿using CommonIniFile;
 
+using Incline.Comm;
 using Incline.Forms;
+using Incline.Models;
 
 using System;
 using System.Collections.Generic;
@@ -31,6 +33,11 @@ namespace Incline
         public const int LAMP_RED = 6;  // 6번 출력: 빨간 램프
         public const int SPARE = 7;  // 7번 출력: 예비(미사용/기타)
 
+        private TcpServer tcpServer;
+        private string currentChassisNumber;
+        private string currentModel;
+        private string currentManufacturer;
+
         private float currentValue = 0.0f;
         private IOBoard ioBoard;
         private Timer ioTimer;
@@ -38,7 +45,6 @@ namespace Incline
         private int currentSequence = 1;
         private bool requestSent = false;
         private SettingDb db;
-
 
         // INI파일 데이터
         private string ipAddress;
@@ -78,7 +84,24 @@ namespace Incline
 
             LoadConfigFromIni();
             db.SetupDatabaseConnection();
+            SetupTcpServer();
             InitializeIOBoard();
+        }
+
+        private void SetupTcpServer()
+        {
+            try
+            {
+                tcpServer = new TcpServer("192.168.10.98", 5000);
+                tcpServer.VehicleInfoReceived += TcpServer_VehicleInfoReceived;
+                tcpServer.PacketReceived += TcpServer_PacketReceived;
+                tcpServer.ServerLog += TcpServer_ServerLog;
+                tcpServer.Start();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"TCP 서버 설정 중 오류가 발생했습니다: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         public void LoadConfigFromIni()
@@ -492,6 +515,7 @@ namespace Incline
                 {
                     ioTimer?.Stop();
                     ioBoard?.Disconnect();
+                    tcpServer.Stop();
                 }
                 catch (Exception ex)
                 {
@@ -589,6 +613,83 @@ namespace Incline
                     }
                 }
             }
+        }
+
+        private void TcpServer_VehicleInfoReceived(object sender, VehicleInfoEventArgs e)
+        {
+            if (InvokeRequired)
+            {
+                Invoke((MethodInvoker)delegate { TcpServer_VehicleInfoReceived(sender, e); });
+                return;
+            }
+
+            try
+            {
+                currentChassisNumber = e.ChassisNumber;
+                currentModel = e.Model;
+                currentManufacturer = e.Manufacturer;
+
+                txt_acceptNo.Text = currentChassisNumber;
+                lbl_currentVehicle.Text = currentChassisNumber;
+
+                UpdateStatusMessage("차량 정보 수신", $"차량 정보: {currentChassisNumber}, {currentModel}, {currentManufacturer}");
+
+                MessageBox.Show($"차량 정보가 수신되었습니다.\n차대번호: {currentChassisNumber}\n모델: {currentModel}\n제조사: {currentManufacturer}",
+                              "차량 정보 수신", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"차량 정보 수신 중 오류가 발생했습니다: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void TcpServer_PacketReceived(object sender, PacketReceivedEventArgs e)
+        {
+            if (InvokeRequired)
+            {
+                Invoke((MethodInvoker)delegate { TcpServer_PacketReceived(sender, e); });
+                return;
+            }
+
+            try
+            {
+                Console.WriteLine($"패킷 수신됨: 명령어={e.Command}, 소스={e.Source}, 데이터={e.Data}, 데이터 카운트={e.DataCount}");
+
+                switch (e.Command)
+                {
+                    case Packet.CMD_WHO:
+                        UpdateStatusMessage("", "설비 인증 요청");
+                        break;
+
+                    case Packet.CMD_REG:
+                        UpdateStatusMessage("", "차량 정보 등록");
+                        break;
+
+                    default:
+                        UpdateStatusMessage("", "알 수 없는 명령");
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"패킷 처리 중 오류 발생: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void TcpServer_ServerLog(object sender, string e)
+        {
+            Console.WriteLine(e);
+        }
+
+        private void UpdateStatusMessage(string title, string message)
+        {
+            if (lbl_title != null && lbl_message != null)
+            {
+                lbl_title.Text = title;
+                lbl_message.Text = message;
+            }
+
+            Console.WriteLine($"[{DateTime.Now}] State : {title} - {message}");
         }
     }
 }

@@ -50,6 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Comm\SerialBarcodeReader.cs" />
+    <Compile Include="Comm\TcpClientConnector.cs" />
     <Compile Include="Comm\TcpServer.cs" />
     <Compile Include="Forms\Form1.cs">
       <SubType>Form</SubType>
@@ -65,6 +66,7 @@
     </Compile>
     <Compile Include="Models\EquipmentType.cs" />
     <Compile Include="Models\Packet.cs" />
+    <Compile Include="Models\VehicleInfo.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Forms\Form1.resx">

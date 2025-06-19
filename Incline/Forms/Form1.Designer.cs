@@ -32,7 +32,7 @@
             this.lbl_arcGaugeValue = new System.Windows.Forms.Label();
             this.lbl_incAngle = new System.Windows.Forms.Label();
             this.panel_arcGauge = new System.Windows.Forms.Panel();
-            this.label1 = new System.Windows.Forms.Label();
+            this.lbl_title = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.btn_motorOn = new System.Windows.Forms.Button();
@@ -98,17 +98,17 @@
             this.panel_arcGauge.TabIndex = 3;
             this.panel_arcGauge.Paint += new System.Windows.Forms.PaintEventHandler(this.panel_arcGauge_Paint);
             // 
-            // label1
+            // lbl_title
             // 
-            this.label1.BackColor = System.Drawing.Color.Silver;
-            this.label1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.label1.Font = new System.Drawing.Font("굴림", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.label1.Location = new System.Drawing.Point(1183, 46);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(700, 29);
-            this.label1.TabIndex = 4;
-            this.label1.Text = "Message";
-            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lbl_title.BackColor = System.Drawing.Color.Silver;
+            this.lbl_title.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.lbl_title.Font = new System.Drawing.Font("굴림", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.lbl_title.Location = new System.Drawing.Point(1183, 46);
+            this.lbl_title.Name = "lbl_title";
+            this.lbl_title.Size = new System.Drawing.Size(700, 29);
+            this.lbl_title.TabIndex = 4;
+            this.lbl_title.Text = "Message";
+            this.lbl_title.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // label2
             // 
@@ -350,7 +350,7 @@
             this.Controls.Add(this.btn_motorOn);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
-            this.Controls.Add(this.label1);
+            this.Controls.Add(this.lbl_title);
             this.Controls.Add(this.panel_arcGauge);
             this.Controls.Add(this.lbl_incAngle);
             this.Controls.Add(this.lbl_arcGaugeValue);
@@ -371,7 +371,7 @@
         private System.Windows.Forms.Label lbl_arcGaugeValue;
         private System.Windows.Forms.Label lbl_incAngle;
         private System.Windows.Forms.Panel panel_arcGauge;
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label lbl_title;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Button btn_motorOn;

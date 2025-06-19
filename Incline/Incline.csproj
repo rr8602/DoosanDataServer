@@ -59,6 +59,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Comm\TcpServer.cs" />
+    <Compile Include="Models\Packet.cs" />
     <Compile Include="SettingDb.cs" />
     <Compile Include="CreateDefaultIni.cs" />
     <Compile Include="Forms\ConfigForm.cs">

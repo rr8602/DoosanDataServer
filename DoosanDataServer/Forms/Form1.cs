@@ -36,7 +36,7 @@ namespace DoosanDataServer
             }
 
             //barcodeReader = new SerialBarcodeReader("COM7");
-            tcpServer = new TcpServer("192.168.10.98", 5000);
+            tcpServer = new TcpServer("192.168.10.98", 5004);
 
             tcpServer.InspectionResultReceived += TcpServer_InspectionResultReceived;
         }
@@ -236,6 +236,30 @@ namespace DoosanDataServer
                 textBox.BackColor = SystemColors.Window;
                 textBox.ForeColor = SystemColors.WindowText;
             }
+        }
+
+        private void btn_connectEquipment_Click(object sender, EventArgs e)
+        {
+            var equipmentAddresses = new Dictionary<EquipmentType, Tuple<string, int>>
+            {
+                { EquipmentType.ABS, Tuple.Create("192.168.10.98", 5001) },
+                { EquipmentType.HLT, Tuple.Create("192.168.10.98", 5002) },
+                { EquipmentType.ADAS, Tuple.Create("192.168.10.98", 5003) },
+                { EquipmentType.ANG, Tuple.Create("192.168.10.98", 5004) },
+                { EquipmentType.WGT, Tuple.Create("192.168.10.98", 5005) }
+            };
+
+            Task.Run(() =>
+            {
+                try
+                {
+                    tcpServer.ConnectToAllEquipment(equipmentAddresses);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"설비 연결 중 오류 발생: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            });
         }
     }
 }

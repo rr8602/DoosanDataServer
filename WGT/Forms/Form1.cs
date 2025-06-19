@@ -16,6 +16,8 @@ using System.Globalization;
 using CommonIniFile;
 
 using WGT.Forms;
+using WGT.Models;
+using WGT.Comm;
 
 namespace WGT
 {
@@ -45,6 +47,11 @@ namespace WGT
         private int currentSequence = 1;
         public string formattedBarcode { get; private set; }
 
+        private TcpServer tcpServer;
+        private string currentChassisNumber;
+        private string currentModel;
+        private string currentManufacturer;
+
         // 측정 데이터 저장
         public double frontLeftWeight { get; private set; }
         public double frontRightWeight { get; private set; }
@@ -72,6 +79,7 @@ namespace WGT
 
             LoadConfigFromIni();
             db.SetupDatabaseConnection();
+            SetupTcpServer();
 
             // 프로세스 타이머 설정
             processTimer = new Timer();
@@ -87,6 +95,21 @@ namespace WGT
             SetState(ProcessState.StandBy);
         }
 
+        private void SetupTcpServer()
+        {
+            try
+            {
+                tcpServer = new TcpServer("192.168.10.98", 5001);
+                tcpServer.VehicleInfoReceived += TcpServer_VehicleInfoReceived;
+                tcpServer.PacketReceived += TcpServer_PacketReceived;
+                tcpServer.ServerLog += TcpServer_ServerLog;
+                tcpServer.Start();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("TCP 서버 설정 중 오류가 발생했습니다: " + ex.Message, "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
         // INI 파일에서 설정 로드
         private void LoadConfigFromIni()
         {
@@ -354,7 +377,14 @@ namespace WGT
 
                 txt_acceptNo.Enabled = false;
 
-                UpdateStatusMessage("바코드 확인 완료", $"{vehicleBarcode} 차량 측정을 시작합니다.");
+                if (!string.IsNullOrEmpty(currentChassisNumber) && vehicleBarcode == currentChassisNumber)
+                {
+                    UpdateStatusMessage("차량 정보 확인", $"{vehicleBarcode} - {currentModel} 차량 측정을 시작합니다.");
+                }
+                else
+                {
+                    MessageBox.Show("차량 정보 확인이 되지 않습니다.: ", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
 
                 Timer transitionTimer = new Timer();
                 transitionTimer.Interval = 2000; // 2초 후에 상태 전환
@@ -520,6 +550,88 @@ namespace WGT
                     txt_acceptNo.Clear();
                     txt_acceptNo.Focus();
                 }
+            }
+        }
+
+        private void TcpServer_VehicleInfoReceived(object sender, VehicleInfoEventArgs e)
+        {
+            if (InvokeRequired)
+            {
+                Invoke((MethodInvoker)delegate { TcpServer_VehicleInfoReceived(sender, e); });
+
+                return;
+            }
+
+            try
+            {
+                currentChassisNumber = e.ChassisNumber;
+                currentModel = e.Model;
+                currentManufacturer = e.Manufacturer;
+
+                txt_acceptNo.Text = currentChassisNumber;
+                lbl_currentVehicle.Text = currentChassisNumber;
+
+                UpdateStatusMessage("차량 정보 수신", $"차량 정보: {currentChassisNumber}, {currentModel}, {currentManufacturer}");
+
+                MessageBox.Show($"차량 정보가 수신되었습니다.\n차대번호: {currentChassisNumber}\n모델: {currentModel}\n제조사: {currentManufacturer}",
+                              "차량 정보 수신", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("차량 정보 수신 중 오류가 발생했습니다: " + ex.Message, "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void TcpServer_PacketReceived(object sender, PacketReceivedEventArgs e)
+        {
+            if (InvokeRequired)
+            {
+                Invoke((MethodInvoker)delegate { TcpServer_PacketReceived(sender, e); });
+                return;
+            }
+
+            try
+            {
+                Console.WriteLine($"패킷 수신됨: 명령어={e.Command}, 소스={e.Source}, 데이터={e.Data}, 데이터 카운트={e.DataCount}");
+
+                switch (e.Command)
+                {
+                    case Packet.CMD_WHO:
+                        UpdateStatusMessage("", "설비 인증 요청");
+                        break;
+
+                    case Packet.CMD_REG:
+                        UpdateStatusMessage("", "차량 정보 등록");
+                        break;
+
+                    default:
+                        UpdateStatusMessage("", "알 수 없는 명령");
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"패킷 처리 중 오류 발생: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void TcpServer_ServerLog(object sender, string e)
+        {
+            Console.WriteLine(e);
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            try
+            {
+                if (tcpServer != null)
+                {
+                    tcpServer.Stop();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("TCP 서버 종료 중 오류가 발생했습니다: " + ex.Message, "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }

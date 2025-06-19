@@ -73,6 +73,13 @@ namespace DoosanDataServer.Comm
         private readonly Packet _packetHandler = new Packet();
         private readonly object _clientsLock = new object();
 
+        private readonly List<VehicleInfo> _sampleVehicles = new List<VehicleInfo>
+        {
+            new VehicleInfo("CHASSIS001", "MODEL A", "Doosan"),
+            new VehicleInfo("CHASSIS002", "MODEL B", "Doosan"),
+            new VehicleInfo("CHASSIS003", "MODEL C", "Doosan")
+        };
+
         // 클라이언트 정보 관리를 위한 내부 클래스
         private class ClientInfo
         {
@@ -365,6 +372,70 @@ namespace DoosanDataServer.Comm
             catch (Exception ex)
             {
                 LogMessage($"패킷 전송 중 오류: {ex.Message}");
+            }
+        }
+
+        // 임의의 차량 정보 반환
+        private VehicleInfo GetRandomVehicleInfo()
+        {
+            Random rand = new Random();
+            int index = rand.Next(0, _sampleVehicles.Count);
+
+            return _sampleVehicles[index];
+        }
+
+        public bool ConnectToEquipment(string ipAddress, int port, EquipmentType equipmentType)
+        {
+            LogMessage($"{equipmentType} 설비에 연결 시도 : {ipAddress}:{port}");
+
+            TcpClientConnector connector = new TcpClientConnector(ipAddress, port, LogMessage);
+
+            if (!connector.Connect())
+            {
+                LogMessage($"{equipmentType} 설비 연결 실패 : {ipAddress}:{port}");
+
+                return false;
+            }
+
+            if (!connector.SendWhoCommand())
+            {
+                LogMessage($"{equipmentType} 설비 WHO 명령 전송 실패 : {ipAddress}:{port}");
+                connector.Close();
+
+                return false;
+            }
+
+            LogMessage("설비 인증 성공");
+
+            VehicleInfo vehicleInfo = GetRandomVehicleInfo();
+
+            if (!connector.SendRegCommand(vehicleInfo.ChassisNumber, vehicleInfo.Model, vehicleInfo.Manufacturer))
+            {
+                LogMessage($"{equipmentType} 설비 REG 명령 전송 실패 : {ipAddress}:{port}");
+                connector.Close();
+
+                return false;
+            }
+
+            LogMessage($"차량 정보 등록 성공: {vehicleInfo.ChassisNumber} {vehicleInfo.Model} {vehicleInfo.Manufacturer}");
+            connector.Close();
+
+            return true;
+        }
+
+        public void ConnectToAllEquipment(Dictionary<EquipmentType, Tuple<string, int>> equipmentAddresses)
+        {
+            foreach (var equipment in equipmentAddresses)
+            {
+                EquipmentType type = equipment.Key;
+                string ipAddress = equipment.Value.Item1;
+                int port = equipment.Value.Item2;
+
+                LogMessage($"{type} 설비 연결 시작");
+
+                bool result = ConnectToEquipment(ipAddress, port, type);
+
+                LogMessage($"{type} 설비 연결 결과: {(result ? "성공" : "실패")}");
             }
         }
 

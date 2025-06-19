@@ -74,6 +74,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Comm\TcpServer.cs" />
     <Compile Include="CreateDefaultIni.cs" />
     <Compile Include="Forms\ConfigForm.cs">
       <SubType>Form</SubType>
@@ -99,6 +100,7 @@
     <Compile Include="Forms\ManualInputForm.Designer.cs">
       <DependentUpon>ManualInputForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Models\Packet.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SettingDb.cs" />

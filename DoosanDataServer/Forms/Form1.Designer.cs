@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             this.lbl_date = new System.Windows.Forms.Label();
             this.dateTimePicker = new System.Windows.Forms.DateTimePicker();
             this.lbl_vin = new System.Windows.Forms.Label();
@@ -38,6 +38,7 @@
             this.column1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.textBox9 = new System.Windows.Forms.TextBox();
             this.textBox8 = new System.Windows.Forms.TextBox();
@@ -124,6 +125,7 @@
             this.textBox86 = new System.Windows.Forms.TextBox();
             this.txt_incAngle = new System.Windows.Forms.TextBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.btn_connectEquipment = new System.Windows.Forms.Button();
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
             this.label3 = new System.Windows.Forms.Label();
             this.textBox35 = new System.Windows.Forms.TextBox();
@@ -206,15 +208,16 @@
             this.dataGridView1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.column1,
             this.Column2,
-            this.Column3});
-            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("굴림", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dataGridView1.DefaultCellStyle = dataGridViewCellStyle2;
+            this.Column3,
+            this.Column4});
+            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle3.Font = new System.Drawing.Font("굴림", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dataGridView1.DefaultCellStyle = dataGridViewCellStyle3;
             this.dataGridView1.Location = new System.Drawing.Point(47, 129);
             this.dataGridView1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.dataGridView1.Name = "dataGridView1";
@@ -233,17 +236,24 @@
             // 
             // Column2
             // 
-            this.Column2.HeaderText = "VIN NO";
+            this.Column2.HeaderText = "차량번호";
             this.Column2.MinimumWidth = 6;
             this.Column2.Name = "Column2";
             this.Column2.Width = 165;
             // 
             // Column3
             // 
-            this.Column3.HeaderText = "MODEL";
+            this.Column3.HeaderText = "모델";
             this.Column3.MinimumWidth = 6;
             this.Column3.Name = "Column3";
             this.Column3.Width = 165;
+            // 
+            // Column4
+            // 
+            this.Column4.HeaderText = "제조사";
+            this.Column4.MinimumWidth = 6;
+            this.Column4.Name = "Column4";
+            this.Column4.Width = 125;
             // 
             // tableLayoutPanel1
             // 
@@ -1334,6 +1344,7 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.btn_connectEquipment);
             this.groupBox1.Controls.Add(this.tableLayoutPanel7);
             this.groupBox1.Controls.Add(this.tableLayoutPanel6);
             this.groupBox1.Controls.Add(this.tableLayoutPanel5);
@@ -1351,6 +1362,19 @@
             this.groupBox1.TabIndex = 9;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "설비 현황";
+            // 
+            // btn_connectEquipment
+            // 
+            this.btn_connectEquipment.BackColor = System.Drawing.Color.Tan;
+            this.btn_connectEquipment.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btn_connectEquipment.Font = new System.Drawing.Font("굴림", 28.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.btn_connectEquipment.Location = new System.Drawing.Point(421, 531);
+            this.btn_connectEquipment.Name = "btn_connectEquipment";
+            this.btn_connectEquipment.Size = new System.Drawing.Size(375, 60);
+            this.btn_connectEquipment.TabIndex = 10;
+            this.btn_connectEquipment.Text = "설비 연결";
+            this.btn_connectEquipment.UseVisualStyleBackColor = false;
+            this.btn_connectEquipment.Click += new System.EventHandler(this.btn_connectEquipment_Click);
             // 
             // tableLayoutPanel3
             // 
@@ -1609,9 +1633,6 @@
         private System.Windows.Forms.TextBox txt_vin;
         private System.Windows.Forms.Button btn_search;
         private System.Windows.Forms.DataGridView dataGridView1;
-        private System.Windows.Forms.DataGridViewTextBoxColumn column1;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Column2;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Column3;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.TextBox textBox9;
         private System.Windows.Forms.TextBox textBox8;
@@ -1714,6 +1735,11 @@
         private System.Windows.Forms.TextBox txt_upward_rlr;
         private System.Windows.Forms.TextBox txt_downward_rlr;
         private System.Windows.Forms.Button btn_inputWgt;
+        private System.Windows.Forms.DataGridViewTextBoxColumn column1;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Column2;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Column3;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Column4;
+        private System.Windows.Forms.Button btn_connectEquipment;
     }
 }
 
