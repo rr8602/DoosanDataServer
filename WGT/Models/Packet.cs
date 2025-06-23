@@ -9,7 +9,7 @@ namespace WGT.Models
     public class Packet
     {
         public const char STX = '<';
-        public const char ETX = '<';
+        public const char ETX = '>';
         public const char DELIMETER = '/';
 
         public const string CMD_WHO = "WHO";
@@ -41,7 +41,7 @@ namespace WGT.Models
             string content = packetStr.Substring(1, packetStr.Length - 2);
             string[] parts = content.Split(DELIMETER);
 
-            if (parts.Length < 4)
+            if (parts.Length < 3)
             {
                 return false;
             }

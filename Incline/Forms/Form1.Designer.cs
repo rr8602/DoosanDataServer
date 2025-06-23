@@ -50,7 +50,6 @@
             this.btn_selectVehicle = new System.Windows.Forms.Button();
             this.label4 = new System.Windows.Forms.Label();
             this.lbl_currentVehicle = new System.Windows.Forms.Label();
-            this.txt_acceptNo = new System.Windows.Forms.TextBox();
             this.btn_inspectionStart = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
@@ -303,16 +302,6 @@
             this.lbl_currentVehicle.TabIndex = 24;
             this.lbl_currentVehicle.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // txt_acceptNo
-            // 
-            this.txt_acceptNo.Font = new System.Drawing.Font("굴림", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.txt_acceptNo.Location = new System.Drawing.Point(645, 937);
-            this.txt_acceptNo.Multiline = true;
-            this.txt_acceptNo.Name = "txt_acceptNo";
-            this.txt_acceptNo.Size = new System.Drawing.Size(289, 93);
-            this.txt_acceptNo.TabIndex = 26;
-            this.txt_acceptNo.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
             // btn_inspectionStart
             // 
             this.btn_inspectionStart.BackColor = System.Drawing.Color.Silver;
@@ -332,7 +321,6 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(2382, 1325);
             this.Controls.Add(this.btn_inspectionStart);
-            this.Controls.Add(this.txt_acceptNo);
             this.Controls.Add(this.lbl_currentVehicle);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.btn_selectVehicle);
@@ -361,7 +349,6 @@
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -389,7 +376,6 @@
         private System.Windows.Forms.Button btn_selectVehicle;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label lbl_currentVehicle;
-        private System.Windows.Forms.TextBox txt_acceptNo;
         private System.Windows.Forms.Button btn_inspectionStart;
     }
 }

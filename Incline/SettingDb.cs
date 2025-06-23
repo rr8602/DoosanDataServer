@@ -74,7 +74,7 @@ namespace Incline
         }
 
         // DB에 측정 데이터 저장 or 수정
-        public void SaveMeasurementDataToMDB(string acceptNo = null)
+        public void SaveMeasurementDataToMDB(string acceptNo = null, string vinNo = null)
         {
             string vehicleAcceptNo = acceptNo ?? (listForm?.SelectedAccpetNo ?? string.Empty);
 
@@ -104,13 +104,15 @@ namespace Incline
                             // 기존 데이터가 존재하면 UPDATE 수행
                             string updateSql = @"UPDATE Incline
                                          SET Mea_Date = ?, 
-                                             Inc_Angle = ?
+                                             Inc_Angle = ?.
+                                             Vin_No = ?
                                          WHERE Accept_No = ?";
 
                             using (OleDbCommand updateCmd = new OleDbCommand(updateSql, con))
                             {
                                 updateCmd.Parameters.Add("@Mea_Date", OleDbType.Date).Value = DateTime.Now;
                                 updateCmd.Parameters.Add("@Inc_Angle", OleDbType.Double).Value = form.inclineAngle;
+                                updateCmd.Parameters.Add("@Vin_No", OleDbType.VarChar).Value = vinNo;
                                 updateCmd.Parameters.Add("@Accept_No", OleDbType.VarChar).Value = acceptNo;
                                 updateCmd.ExecuteNonQuery();
                             }
@@ -119,13 +121,14 @@ namespace Incline
                         {
                             // 기존 데이터가 없으면 INSERT 수행
                             string insertSql = @"INSERT INTO Incline
-                                         (Accept_No, Mea_Date, Inc_Angle)
+                                         (Accept_No, Vin_No, Mea_Date, Inc_Angle)
                                          VALUES
-                                         (?, ?, ?)";
+                                         (?, ?, ?, ?)";
 
                             using (OleDbCommand insertCmd = new OleDbCommand(insertSql, con))
                             {
                                 insertCmd.Parameters.Add("@Accept_No", OleDbType.VarChar).Value = acceptNo;
+                                insertCmd.Parameters.Add("@Vin_No", OleDbType.VarChar).Value = vinNo;
                                 insertCmd.Parameters.Add("@Mea_Date", OleDbType.Date).Value = DateTime.Now;
                                 insertCmd.Parameters.Add("@Inc_Angle", OleDbType.Double).Value = form.inclineAngle;
                                 insertCmd.ExecuteNonQuery();

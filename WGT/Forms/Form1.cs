@@ -49,8 +49,6 @@ namespace WGT
 
         private TcpServer tcpServer;
         private string currentChassisNumber;
-        private string currentModel;
-        private string currentManufacturer;
 
         // 측정 데이터 저장
         public double frontLeftWeight { get; private set; }
@@ -99,7 +97,7 @@ namespace WGT
         {
             try
             {
-                tcpServer = new TcpServer("192.168.10.98", 5001);
+                tcpServer = new TcpServer("192.168.10.98", 5005);
                 tcpServer.VehicleInfoReceived += TcpServer_VehicleInfoReceived;
                 tcpServer.PacketReceived += TcpServer_PacketReceived;
                 tcpServer.ServerLog += TcpServer_ServerLog;
@@ -223,7 +221,6 @@ namespace WGT
                     InitializeValues();
                     frontWheelmeasured = false;
                     rearWheelMeasured = false;
-                    txt_acceptNo.Enabled = true;
 
                     processTimer.Start();
                     break;
@@ -261,7 +258,7 @@ namespace WGT
                 case ProcessState.DataSaving:
                     UpdateStatusMessage("데이터 저장", "측정 데이터를 저장 중입니다.");
                     SendWeightDataToServer();
-                    db.SaveMeasurementDataToMDB(vehicleBarcode);
+                    db.SaveMeasurementDataToMDB(vehicleBarcode, currentChassisNumber);
                     break;
             }
         }
@@ -375,15 +372,9 @@ namespace WGT
             {
                 Console.WriteLine($"[{DateTime.Now}] 바코드 처리 완료 : {vehicleBarcode}");
 
-                txt_acceptNo.Enabled = false;
-
                 if (!string.IsNullOrEmpty(currentChassisNumber) && vehicleBarcode == currentChassisNumber)
                 {
-                    UpdateStatusMessage("차량 정보 확인", $"{vehicleBarcode} - {currentModel} 차량 측정을 시작합니다.");
-                }
-                else
-                {
-                    MessageBox.Show("차량 정보 확인이 되지 않습니다.: ", "경고", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    UpdateStatusMessage("차량 정보 확인", $"{vehicleBarcode} 차량 측정을 시작합니다.");
                 }
 
                 Timer transitionTimer = new Timer();
@@ -400,8 +391,6 @@ namespace WGT
             catch (Exception ex)
             {
                 MessageBox.Show("바코드 처리 중 오류가 발생했습니다: " + ex.Message, "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                txt_acceptNo.Clear();
-                txt_acceptNo.Focus();
             }
         }
 
@@ -512,7 +501,7 @@ namespace WGT
 
         private void btn_inspectionStart_Click(object sender, EventArgs e)
         {
-            vehicleBarcode = txt_acceptNo.Text.Trim();
+            vehicleBarcode = currentChassisNumber;
 
             if (!string.IsNullOrEmpty(vehicleBarcode))
             {
@@ -525,31 +514,16 @@ namespace WGT
                     // 추가 처리 후 FrontWheelEntry 상태로 전환
                     ProcessBarcodeAndProceed();
 
-                    lbl_currentVehicle.Text = txt_acceptNo.Text;
+                    lbl_currentVehicle.Text = vehicleBarcode;
                 }
                 else
                 {
                     MessageBox.Show("유효하지 않은 바코드입니다. 다시 시도해주세요.", "바코드 오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    txt_acceptNo.Clear();
-                    txt_acceptNo.Focus();
                 }
             }
             else
             {
-                if (ValidateBarcode(lbl_currentVehicle.Text.Trim()))
-                {
-                    vehicleBarcode = lbl_currentVehicle.Text.Trim();
-                    txt_acceptNo.Text = vehicleBarcode;
-
-                    SetState(ProcessState.BarcodeInput);
-                    ProcessBarcodeAndProceed();
-                }
-                else
-                {
-                    MessageBox.Show("유효하지 않은 바코드입니다. 다시 시도해주세요.", "바코드 오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    txt_acceptNo.Clear();
-                    txt_acceptNo.Focus();
-                }
+                MessageBox.Show("차대번호가 없습니다. 서버에서 차대번호를 받아야 검사를 시작할 수 있습니다.", "차량 정보 없음", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
@@ -565,16 +539,13 @@ namespace WGT
             try
             {
                 currentChassisNumber = e.ChassisNumber;
-                currentModel = e.Model;
-                currentManufacturer = e.Manufacturer;
 
-                txt_acceptNo.Text = currentChassisNumber;
+                btn_inspectionStart.Enabled = !string.IsNullOrEmpty(currentChassisNumber);
                 lbl_currentVehicle.Text = currentChassisNumber;
 
-                UpdateStatusMessage("차량 정보 수신", $"차량 정보: {currentChassisNumber}, {currentModel}, {currentManufacturer}");
+                UpdateStatusMessage("차량 정보 수신", $"차량 정보: {currentChassisNumber}");
 
-                MessageBox.Show($"차량 정보가 수신되었습니다.\n차대번호: {currentChassisNumber}\n모델: {currentModel}\n제조사: {currentManufacturer}",
-                              "차량 정보 수신", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show($"차량 정보가 수신되었습니다.\n차대번호: {currentChassisNumber}", "차량 정보 수신", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {

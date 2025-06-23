@@ -42,7 +42,7 @@ namespace Incline.Models
             string content = packetStr.Substring(1, packetStr.Length - 2);
             string[] parts = content.Split(DELIMETER);
 
-            if (parts.Length < 4)
+            if (parts.Length < 3)
             {
                 return false;
             }

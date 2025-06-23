@@ -236,6 +236,7 @@ namespace DoosanDataServer.Comm
                     }
 
                     string message = Encoding.GetEncoding("EUC-KR").GetString(buffer, 0, bytesRead);
+
                     LogMessage($"수신된 원본 데이터: {message}");
 
                     int etxIndex;
@@ -384,7 +385,7 @@ namespace DoosanDataServer.Comm
             return _sampleVehicles[index];
         }
 
-        public bool ConnectToEquipment(string ipAddress, int port, EquipmentType equipmentType)
+        public bool ConnectToEquipment(string ipAddress, int port, EquipmentType equipmentType, string chassisNumber)
         {
             LogMessage($"{equipmentType} 설비에 연결 시도 : {ipAddress}:{port}");
 
@@ -407,9 +408,7 @@ namespace DoosanDataServer.Comm
 
             LogMessage("설비 인증 성공");
 
-            VehicleInfo vehicleInfo = GetRandomVehicleInfo();
-
-            if (!connector.SendRegCommand(vehicleInfo.ChassisNumber, vehicleInfo.Model, vehicleInfo.Manufacturer))
+            if (!connector.SendRegCommand(chassisNumber, "사용자입력차량", ""))
             {
                 LogMessage($"{equipmentType} 설비 REG 명령 전송 실패 : {ipAddress}:{port}");
                 connector.Close();
@@ -417,14 +416,20 @@ namespace DoosanDataServer.Comm
                 return false;
             }
 
-            LogMessage($"차량 정보 등록 성공: {vehicleInfo.ChassisNumber} {vehicleInfo.Model} {vehicleInfo.Manufacturer}");
+            LogMessage($"차량 정보 등록 성공: {chassisNumber}");
             connector.Close();
 
             return true;
         }
 
-        public void ConnectToAllEquipment(Dictionary<EquipmentType, Tuple<string, int>> equipmentAddresses)
+        public void ConnectToAllEquipment(Dictionary<EquipmentType, Tuple<string, int>> equipmentAddresses, string chassisNumber = "")
         {
+            if (string.IsNullOrEmpty(chassisNumber))
+            {
+                VehicleInfo vehicleInfo = GetRandomVehicleInfo();
+                chassisNumber = vehicleInfo.ChassisNumber;
+            }
+
             foreach (var equipment in equipmentAddresses)
             {
                 EquipmentType type = equipment.Key;
@@ -433,7 +438,7 @@ namespace DoosanDataServer.Comm
 
                 LogMessage($"{type} 설비 연결 시작");
 
-                bool result = ConnectToEquipment(ipAddress, port, type);
+                bool result = ConnectToEquipment(ipAddress, port, type, chassisNumber);
 
                 LogMessage($"{type} 설비 연결 결과: {(result ? "성공" : "실패")}");
             }

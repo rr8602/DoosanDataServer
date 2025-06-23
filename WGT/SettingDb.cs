@@ -74,7 +74,7 @@ namespace WGT
         }
 
         // DB에 측정 데이터 저장 or 수정
-        public void SaveMeasurementDataToMDB(string acceptNo = null)
+        public void SaveMeasurementDataToMDB(string acceptNo = null, string vinNo = null)
         {
             string vehicleAcceptNo = acceptNo ?? (listForm?.SelectedAccpetNo ?? string.Empty);
 
@@ -110,7 +110,8 @@ namespace WGT
                                              R_LW = ?, 
                                              R_RW = ?, 
                                              R_TW = ?, 
-                                             Total_Weight = ?
+                                             Total_Weight = ?,
+                                             Vin_No = ?
                                          WHERE Accept_No = ?";
 
                             using (OleDbCommand updateCmd = new OleDbCommand(updateSql, con))
@@ -123,6 +124,7 @@ namespace WGT
                                 updateCmd.Parameters.Add("@R_RW", OleDbType.Double).Value = form.rearRightWeight;
                                 updateCmd.Parameters.Add("@R_TW", OleDbType.Double).Value = form.rearTotalWeight;
                                 updateCmd.Parameters.Add("@Total_Weight", OleDbType.Double).Value = form.totalWeight;
+                                updateCmd.Parameters.Add("@Vin_No", OleDbType.VarChar).Value = vinNo;
                                 updateCmd.Parameters.Add("@Accept_No", OleDbType.VarChar).Value = acceptNo;
                                 updateCmd.ExecuteNonQuery();
                             }
@@ -131,14 +133,15 @@ namespace WGT
                         {
                             // 기존 데이터가 없으면 INSERT 수행
                             string insertSql = @"INSERT INTO MeasurementData
-                                         (Accept_No, Mea_Date, F_LW, F_RW, F_TW,
+                                         (Accept_No, Vin_No, Mea_Date, F_LW, F_RW, F_TW,
                                           R_LW, R_RW, R_TW, Total_Weight)
                                          VALUES
-                                         (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                                         (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
                             using (OleDbCommand insertCmd = new OleDbCommand(insertSql, con))
                             {
                                 insertCmd.Parameters.Add("@Accept_No", OleDbType.VarChar).Value = acceptNo;
+                                insertCmd.Parameters.Add("@Vin_No", OleDbType.VarChar).Value = vinNo;
                                 insertCmd.Parameters.Add("@Mea_Date", OleDbType.Date).Value = DateTime.Now;
                                 insertCmd.Parameters.Add("@F_LW", OleDbType.Double).Value = form.frontLeftWeight;
                                 insertCmd.Parameters.Add("@F_RW", OleDbType.Double).Value = form.frontRightWeight;

@@ -63,7 +63,6 @@
             this.btn_manualInput = new System.Windows.Forms.Button();
             this.label10 = new System.Windows.Forms.Label();
             this.label11 = new System.Windows.Forms.Label();
-            this.txt_acceptNo = new System.Windows.Forms.TextBox();
             this.btn_config = new System.Windows.Forms.Button();
             this.btn_selectVehicle = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
@@ -454,13 +453,6 @@
             this.label11.Text = "후륜";
             this.label11.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // txt_acceptNo
-            // 
-            this.txt_acceptNo.Location = new System.Drawing.Point(1611, 336);
-            this.txt_acceptNo.Name = "txt_acceptNo";
-            this.txt_acceptNo.Size = new System.Drawing.Size(238, 25);
-            this.txt_acceptNo.TabIndex = 13;
-            // 
             // btn_config
             // 
             this.btn_config.BackColor = System.Drawing.Color.Silver;
@@ -531,7 +523,6 @@
             this.Controls.Add(this.label3);
             this.Controls.Add(this.btn_selectVehicle);
             this.Controls.Add(this.btn_config);
-            this.Controls.Add(this.txt_acceptNo);
             this.Controls.Add(this.btn_manualInput);
             this.Controls.Add(this.btn_exit);
             this.Controls.Add(this.btn_setAllZero);
@@ -570,7 +561,6 @@
             this.panel12.ResumeLayout(false);
             this.panel13.ResumeLayout(false);
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -611,7 +601,6 @@
         private System.Windows.Forms.Label lbl_processTitle;
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.Label label11;
-        private System.Windows.Forms.TextBox txt_acceptNo;
         private System.Windows.Forms.Button btn_config;
         private System.Windows.Forms.Button btn_selectVehicle;
         private System.Windows.Forms.Label label3;

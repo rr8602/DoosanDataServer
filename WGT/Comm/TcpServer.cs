@@ -34,13 +34,9 @@ namespace WGT.Comm
     public class VehicleInfoEventArgs : EventArgs
     {
         public string ChassisNumber { get; set; }
-        public string Model { get; set; }
-        public string Manufacturer { get; set; }
-        public VehicleInfoEventArgs(string chassisNumber, string model, string manufacturer)
+        public VehicleInfoEventArgs(string chassisNumber)
         {
             ChassisNumber = chassisNumber;
-            Model = model;
-            Manufacturer = manufacturer ?? string.Empty;
         }
     }
 
@@ -49,7 +45,7 @@ namespace WGT.Comm
         private TcpListener _listener;
         private bool _isRunning;
         private Thread _listenThread;
-        private readonly Packet _packetHandler =new Packet();
+        private readonly Packet _packetHandler = new Packet();
         private readonly object _clientsLock = new object();
         private readonly List<TcpClient> _clients = new List<TcpClient>();
 
@@ -180,24 +176,15 @@ namespace WGT.Comm
                         break;
                     }
 
-                    string message = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                    string message = Encoding.GetEncoding("EUC-KR").GetString(buffer, 0, bytesRead);
 
                     LogMessage($"수신된 데이터 ({clientEndpoint}): {message}");
 
                     int etxIndex;
-                    int startIndex = 0;
 
-                    while ((etxIndex = message.IndexOf(Packet.ETX, startIndex)) >= 0)
+                    while ((etxIndex = message.IndexOf(Packet.ETX)) >= 0)
                     {
-                        int stxIndex = message.LastIndexOf(Packet.STX, etxIndex);
-
-                        if (stxIndex < 0 || stxIndex >= etxIndex)
-                        {
-                            startIndex = etxIndex + 1;
-                            continue;
-                        }
-
-                        string packetStr = message.Substring(stxIndex, etxIndex - stxIndex + 1);
+                        string packetStr = message.Substring(0, etxIndex + 1);
 
                         LogMessage($"패킷 수신됨: {packetStr}");
 
@@ -212,7 +199,7 @@ namespace WGT.Comm
                             LogMessage($"패킷 파싱 실패: {packetStr}");
                         }
 
-                        startIndex = etxIndex + 1;
+                        message = message.Substring(etxIndex + 1);
                     }
                 }
             }
@@ -259,12 +246,10 @@ namespace WGT.Comm
                 {
                     string[] vehicleData = data.Split('/');
                     string chassisNumber = vehicleData.Length > 0 ? vehicleData[0] : string.Empty;
-                    string model = vehicleData.Length > 1 ? vehicleData[1] : string.Empty;
-                    string manufacturer = vehicleData.Length > 2 ? vehicleData[2] : string.Empty;
 
-                    LogMessage($"차량 정보 수신: 차대번호={chassisNumber}, 모델={model}, 제조사={manufacturer}");
+                    LogMessage($"차량 정보 수신: 차대번호={chassisNumber}");
                     
-                    VehicleInfoReceived?.Invoke(this, new VehicleInfoEventArgs(chassisNumber, model, manufacturer));
+                    VehicleInfoReceived?.Invoke(this, new VehicleInfoEventArgs(chassisNumber));
                 }
                 catch (Exception ex)
                 {

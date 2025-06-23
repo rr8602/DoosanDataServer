@@ -55,6 +55,8 @@ namespace Incline
         public string formattedBarcode { get; private set; }
         public double inclineAngle { get; private set; }
 
+        private TextBox txt_vinNo;
+
         public void MotorOn() => SetOutputPin(MOTOR, true);
         public void MotorOff() => SetOutputPin(MOTOR, false);
 
@@ -81,6 +83,8 @@ namespace Incline
             this.Size = new Size(1920, 1080);
 
             db = new SettingDb(this);
+
+            btn_inspectionStart.Enabled = false;
 
             LoadConfigFromIni();
             db.SetupDatabaseConnection();
@@ -564,7 +568,8 @@ namespace Incline
         {
             string acceptNo = string.Empty;
             double angle;
-            vehicleBarcode = txt_acceptNo.Text.Trim();
+
+            vehicleBarcode = currentChassisNumber;
 
             if (ioBoard.isConnected == false)
             {
@@ -577,40 +582,22 @@ namespace Incline
                 {
                     if (ValidateBarcode(vehicleBarcode))
                     {
-                        lbl_currentVehicle.Text = txt_acceptNo.Text;
+                        lbl_currentVehicle.Text = vehicleBarcode;
 
                         angle = GetCurrentInclination();
                         ControlByInclineAngle(angle);
 
                         acceptNo = SendWeightDataToServer();
-                        db.SaveMeasurementDataToMDB(acceptNo);
+                        db.SaveMeasurementDataToMDB(acceptNo, vehicleBarcode);
                     }
                     else
                     {
                         MessageBox.Show("유효하지 않은 바코드입니다. 다시 시도해주세요.", "바코드 오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        txt_acceptNo.Clear();
-                        txt_acceptNo.Focus();
                     }
                 }
                 else
                 {
-                    if (ValidateBarcode(lbl_currentVehicle.Text.Trim()))
-                    {
-                        vehicleBarcode = lbl_currentVehicle.Text.Trim();
-                        txt_acceptNo.Text = vehicleBarcode;
-
-                        angle = GetCurrentInclination();
-                        ControlByInclineAngle(angle);
-
-                        acceptNo = SendWeightDataToServer();
-                        db.SaveMeasurementDataToMDB(acceptNo);
-                    }
-                    else
-                    {
-                        MessageBox.Show("유효하지 않은 바코드입니다. 다시 시도해주세요.", "바코드 오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        txt_acceptNo.Clear();
-                        txt_acceptNo.Focus();
-                    }
+                    MessageBox.Show("차량 바코드가 입력되지 않았습니다. 차량을 선택하거나 바코드를 입력해주세요.", "바코드 오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -629,7 +616,8 @@ namespace Incline
                 currentModel = e.Model;
                 currentManufacturer = e.Manufacturer;
 
-                txt_acceptNo.Text = currentChassisNumber;
+                btn_inspectionStart.Enabled = !string.IsNullOrEmpty(currentChassisNumber);
+
                 lbl_currentVehicle.Text = currentChassisNumber;
 
                 UpdateStatusMessage("차량 정보 수신", $"차량 정보: {currentChassisNumber}, {currentModel}, {currentManufacturer}");
