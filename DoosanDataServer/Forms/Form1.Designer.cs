@@ -35,6 +35,9 @@
             this.txt_searchVin = new System.Windows.Forms.TextBox();
             this.btn_search = new System.Windows.Forms.Button();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
+            this.Accept_No = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Vin_No = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Mea_Date = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.label1 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
@@ -55,25 +58,25 @@
             this.label19 = new System.Windows.Forms.Label();
             this.label20 = new System.Windows.Forms.Label();
             this.label21 = new System.Windows.Forms.Label();
-            this.label22 = new System.Windows.Forms.Label();
-            this.label23 = new System.Windows.Forms.Label();
-            this.label24 = new System.Windows.Forms.Label();
-            this.label25 = new System.Windows.Forms.Label();
+            this.lbl_frontWeight = new System.Windows.Forms.Label();
+            this.lbl_frontSum = new System.Windows.Forms.Label();
+            this.lbl_frontDiff = new System.Windows.Forms.Label();
+            this.lbl_frontOkNg = new System.Windows.Forms.Label();
             this.label26 = new System.Windows.Forms.Label();
-            this.label27 = new System.Windows.Forms.Label();
-            this.label28 = new System.Windows.Forms.Label();
-            this.label29 = new System.Windows.Forms.Label();
-            this.label30 = new System.Windows.Forms.Label();
+            this.lbl_rearWeight = new System.Windows.Forms.Label();
+            this.lbl_rearSum = new System.Windows.Forms.Label();
+            this.lbl_rearDiff = new System.Windows.Forms.Label();
+            this.lbl_rearOkNg = new System.Windows.Forms.Label();
             this.label31 = new System.Windows.Forms.Label();
-            this.label32 = new System.Windows.Forms.Label();
-            this.label33 = new System.Windows.Forms.Label();
-            this.label34 = new System.Windows.Forms.Label();
-            this.label35 = new System.Windows.Forms.Label();
+            this.lbl_totalWeight = new System.Windows.Forms.Label();
+            this.lbl_totalSum = new System.Windows.Forms.Label();
+            this.lbl_totalDiff = new System.Windows.Forms.Label();
+            this.lbl_totalOkNg = new System.Windows.Forms.Label();
             this.label36 = new System.Windows.Forms.Label();
-            this.label37 = new System.Windows.Forms.Label();
-            this.label38 = new System.Windows.Forms.Label();
-            this.label39 = new System.Windows.Forms.Label();
-            this.label40 = new System.Windows.Forms.Label();
+            this.lbl_parkingWeight = new System.Windows.Forms.Label();
+            this.lbl_parkingSum = new System.Windows.Forms.Label();
+            this.lbl_parkingDiff = new System.Windows.Forms.Label();
+            this.lbl_parkingOkNg = new System.Windows.Forms.Label();
             this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
             this.label77 = new System.Windows.Forms.Label();
             this.label78 = new System.Windows.Forms.Label();
@@ -109,11 +112,11 @@
             this.label54 = new System.Windows.Forms.Label();
             this.label55 = new System.Windows.Forms.Label();
             this.label56 = new System.Windows.Forms.Label();
-            this.label57 = new System.Windows.Forms.Label();
-            this.label58 = new System.Windows.Forms.Label();
+            this.lbl_speedFourtyValue = new System.Windows.Forms.Label();
+            this.lbl_speedFourtyOkNg = new System.Windows.Forms.Label();
             this.label59 = new System.Windows.Forms.Label();
-            this.label60 = new System.Windows.Forms.Label();
-            this.label61 = new System.Windows.Forms.Label();
+            this.lbl_speedMaxValue = new System.Windows.Forms.Label();
+            this.lbl_speedMaxOkNg = new System.Windows.Forms.Label();
             this.tableLayoutPanel7 = new System.Windows.Forms.TableLayoutPanel();
             this.label7 = new System.Windows.Forms.Label();
             this.label92 = new System.Windows.Forms.Label();
@@ -138,9 +141,6 @@
             this.lbl_upward_rcd = new System.Windows.Forms.Label();
             this.lbl_upward_rud = new System.Windows.Forms.Label();
             this.lbl_upward_rlr = new System.Windows.Forms.Label();
-            this.Accept_No = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Vin_No = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Mea_Date = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
@@ -226,6 +226,27 @@
             this.dataGridView1.Size = new System.Drawing.Size(664, 970);
             this.dataGridView1.TabIndex = 8;
             this.dataGridView1.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellClick);
+            // 
+            // Accept_No
+            // 
+            this.Accept_No.HeaderText = "접수번호";
+            this.Accept_No.MinimumWidth = 6;
+            this.Accept_No.Name = "Accept_No";
+            this.Accept_No.Width = 220;
+            // 
+            // Vin_No
+            // 
+            this.Vin_No.HeaderText = "차량번호";
+            this.Vin_No.MinimumWidth = 6;
+            this.Vin_No.Name = "Vin_No";
+            this.Vin_No.Width = 220;
+            // 
+            // Mea_Date
+            // 
+            this.Mea_Date.HeaderText = "측정시간";
+            this.Mea_Date.MinimumWidth = 6;
+            this.Mea_Date.Name = "Mea_Date";
+            this.Mea_Date.Width = 220;
             // 
             // tableLayoutPanel1
             // 
@@ -396,25 +417,25 @@
             this.tableLayoutPanel2.Controls.Add(this.label19, 3, 1);
             this.tableLayoutPanel2.Controls.Add(this.label20, 4, 1);
             this.tableLayoutPanel2.Controls.Add(this.label21, 0, 2);
-            this.tableLayoutPanel2.Controls.Add(this.label22, 1, 2);
-            this.tableLayoutPanel2.Controls.Add(this.label23, 2, 2);
-            this.tableLayoutPanel2.Controls.Add(this.label24, 3, 2);
-            this.tableLayoutPanel2.Controls.Add(this.label25, 4, 2);
+            this.tableLayoutPanel2.Controls.Add(this.lbl_frontWeight, 1, 2);
+            this.tableLayoutPanel2.Controls.Add(this.lbl_frontSum, 2, 2);
+            this.tableLayoutPanel2.Controls.Add(this.lbl_frontDiff, 3, 2);
+            this.tableLayoutPanel2.Controls.Add(this.lbl_frontOkNg, 4, 2);
             this.tableLayoutPanel2.Controls.Add(this.label26, 0, 3);
-            this.tableLayoutPanel2.Controls.Add(this.label27, 1, 3);
-            this.tableLayoutPanel2.Controls.Add(this.label28, 2, 3);
-            this.tableLayoutPanel2.Controls.Add(this.label29, 3, 3);
-            this.tableLayoutPanel2.Controls.Add(this.label30, 4, 3);
+            this.tableLayoutPanel2.Controls.Add(this.lbl_rearWeight, 1, 3);
+            this.tableLayoutPanel2.Controls.Add(this.lbl_rearSum, 2, 3);
+            this.tableLayoutPanel2.Controls.Add(this.lbl_rearDiff, 3, 3);
+            this.tableLayoutPanel2.Controls.Add(this.lbl_rearOkNg, 4, 3);
             this.tableLayoutPanel2.Controls.Add(this.label31, 0, 4);
-            this.tableLayoutPanel2.Controls.Add(this.label32, 1, 4);
-            this.tableLayoutPanel2.Controls.Add(this.label33, 2, 4);
-            this.tableLayoutPanel2.Controls.Add(this.label34, 3, 4);
-            this.tableLayoutPanel2.Controls.Add(this.label35, 4, 4);
+            this.tableLayoutPanel2.Controls.Add(this.lbl_totalWeight, 1, 4);
+            this.tableLayoutPanel2.Controls.Add(this.lbl_totalSum, 2, 4);
+            this.tableLayoutPanel2.Controls.Add(this.lbl_totalDiff, 3, 4);
+            this.tableLayoutPanel2.Controls.Add(this.lbl_totalOkNg, 4, 4);
             this.tableLayoutPanel2.Controls.Add(this.label36, 0, 5);
-            this.tableLayoutPanel2.Controls.Add(this.label37, 1, 5);
-            this.tableLayoutPanel2.Controls.Add(this.label38, 2, 5);
-            this.tableLayoutPanel2.Controls.Add(this.label39, 3, 5);
-            this.tableLayoutPanel2.Controls.Add(this.label40, 4, 5);
+            this.tableLayoutPanel2.Controls.Add(this.lbl_parkingWeight, 1, 5);
+            this.tableLayoutPanel2.Controls.Add(this.lbl_parkingSum, 2, 5);
+            this.tableLayoutPanel2.Controls.Add(this.lbl_parkingDiff, 3, 5);
+            this.tableLayoutPanel2.Controls.Add(this.lbl_parkingOkNg, 4, 5);
             this.tableLayoutPanel2.Location = new System.Drawing.Point(25, 350);
             this.tableLayoutPanel2.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
@@ -510,49 +531,49 @@
             this.label21.Text = "전";
             this.label21.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // label22
+            // lbl_frontWeight
             // 
-            this.label22.BackColor = System.Drawing.Color.White;
-            this.label22.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.label22.Font = new System.Drawing.Font("굴림", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.label22.Location = new System.Drawing.Point(101, 108);
-            this.label22.Name = "label22";
-            this.label22.Size = new System.Drawing.Size(92, 54);
-            this.label22.TabIndex = 7;
-            this.label22.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lbl_frontWeight.BackColor = System.Drawing.Color.White;
+            this.lbl_frontWeight.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lbl_frontWeight.Font = new System.Drawing.Font("굴림", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.lbl_frontWeight.Location = new System.Drawing.Point(101, 108);
+            this.lbl_frontWeight.Name = "lbl_frontWeight";
+            this.lbl_frontWeight.Size = new System.Drawing.Size(92, 54);
+            this.lbl_frontWeight.TabIndex = 7;
+            this.lbl_frontWeight.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // label23
+            // lbl_frontSum
             // 
-            this.label23.BackColor = System.Drawing.Color.White;
-            this.label23.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.label23.Font = new System.Drawing.Font("굴림", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.label23.Location = new System.Drawing.Point(199, 108);
-            this.label23.Name = "label23";
-            this.label23.Size = new System.Drawing.Size(92, 54);
-            this.label23.TabIndex = 8;
-            this.label23.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lbl_frontSum.BackColor = System.Drawing.Color.White;
+            this.lbl_frontSum.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lbl_frontSum.Font = new System.Drawing.Font("굴림", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.lbl_frontSum.Location = new System.Drawing.Point(199, 108);
+            this.lbl_frontSum.Name = "lbl_frontSum";
+            this.lbl_frontSum.Size = new System.Drawing.Size(92, 54);
+            this.lbl_frontSum.TabIndex = 8;
+            this.lbl_frontSum.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // label24
+            // lbl_frontDiff
             // 
-            this.label24.BackColor = System.Drawing.Color.White;
-            this.label24.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.label24.Font = new System.Drawing.Font("굴림", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.label24.Location = new System.Drawing.Point(297, 108);
-            this.label24.Name = "label24";
-            this.label24.Size = new System.Drawing.Size(92, 54);
-            this.label24.TabIndex = 9;
-            this.label24.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lbl_frontDiff.BackColor = System.Drawing.Color.White;
+            this.lbl_frontDiff.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lbl_frontDiff.Font = new System.Drawing.Font("굴림", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.lbl_frontDiff.Location = new System.Drawing.Point(297, 108);
+            this.lbl_frontDiff.Name = "lbl_frontDiff";
+            this.lbl_frontDiff.Size = new System.Drawing.Size(92, 54);
+            this.lbl_frontDiff.TabIndex = 9;
+            this.lbl_frontDiff.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // label25
+            // lbl_frontOkNg
             // 
-            this.label25.BackColor = System.Drawing.Color.White;
-            this.label25.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.label25.Font = new System.Drawing.Font("굴림", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.label25.Location = new System.Drawing.Point(395, 108);
-            this.label25.Name = "label25";
-            this.label25.Size = new System.Drawing.Size(95, 54);
-            this.label25.TabIndex = 10;
-            this.label25.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lbl_frontOkNg.BackColor = System.Drawing.Color.White;
+            this.lbl_frontOkNg.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lbl_frontOkNg.Font = new System.Drawing.Font("굴림", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.lbl_frontOkNg.Location = new System.Drawing.Point(395, 108);
+            this.lbl_frontOkNg.Name = "lbl_frontOkNg";
+            this.lbl_frontOkNg.Size = new System.Drawing.Size(95, 54);
+            this.lbl_frontOkNg.TabIndex = 10;
+            this.lbl_frontOkNg.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // label26
             // 
@@ -566,49 +587,49 @@
             this.label26.Text = "후";
             this.label26.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // label27
+            // lbl_rearWeight
             // 
-            this.label27.BackColor = System.Drawing.Color.White;
-            this.label27.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.label27.Font = new System.Drawing.Font("굴림", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.label27.Location = new System.Drawing.Point(101, 162);
-            this.label27.Name = "label27";
-            this.label27.Size = new System.Drawing.Size(92, 54);
-            this.label27.TabIndex = 12;
-            this.label27.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lbl_rearWeight.BackColor = System.Drawing.Color.White;
+            this.lbl_rearWeight.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lbl_rearWeight.Font = new System.Drawing.Font("굴림", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.lbl_rearWeight.Location = new System.Drawing.Point(101, 162);
+            this.lbl_rearWeight.Name = "lbl_rearWeight";
+            this.lbl_rearWeight.Size = new System.Drawing.Size(92, 54);
+            this.lbl_rearWeight.TabIndex = 12;
+            this.lbl_rearWeight.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // label28
+            // lbl_rearSum
             // 
-            this.label28.BackColor = System.Drawing.Color.White;
-            this.label28.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.label28.Font = new System.Drawing.Font("굴림", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.label28.Location = new System.Drawing.Point(199, 162);
-            this.label28.Name = "label28";
-            this.label28.Size = new System.Drawing.Size(92, 54);
-            this.label28.TabIndex = 13;
-            this.label28.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lbl_rearSum.BackColor = System.Drawing.Color.White;
+            this.lbl_rearSum.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lbl_rearSum.Font = new System.Drawing.Font("굴림", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.lbl_rearSum.Location = new System.Drawing.Point(199, 162);
+            this.lbl_rearSum.Name = "lbl_rearSum";
+            this.lbl_rearSum.Size = new System.Drawing.Size(92, 54);
+            this.lbl_rearSum.TabIndex = 13;
+            this.lbl_rearSum.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // label29
+            // lbl_rearDiff
             // 
-            this.label29.BackColor = System.Drawing.Color.White;
-            this.label29.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.label29.Font = new System.Drawing.Font("굴림", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.label29.Location = new System.Drawing.Point(297, 162);
-            this.label29.Name = "label29";
-            this.label29.Size = new System.Drawing.Size(92, 54);
-            this.label29.TabIndex = 14;
-            this.label29.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lbl_rearDiff.BackColor = System.Drawing.Color.White;
+            this.lbl_rearDiff.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lbl_rearDiff.Font = new System.Drawing.Font("굴림", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.lbl_rearDiff.Location = new System.Drawing.Point(297, 162);
+            this.lbl_rearDiff.Name = "lbl_rearDiff";
+            this.lbl_rearDiff.Size = new System.Drawing.Size(92, 54);
+            this.lbl_rearDiff.TabIndex = 14;
+            this.lbl_rearDiff.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // label30
+            // lbl_rearOkNg
             // 
-            this.label30.BackColor = System.Drawing.Color.White;
-            this.label30.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.label30.Font = new System.Drawing.Font("굴림", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.label30.Location = new System.Drawing.Point(395, 162);
-            this.label30.Name = "label30";
-            this.label30.Size = new System.Drawing.Size(95, 54);
-            this.label30.TabIndex = 15;
-            this.label30.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lbl_rearOkNg.BackColor = System.Drawing.Color.White;
+            this.lbl_rearOkNg.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lbl_rearOkNg.Font = new System.Drawing.Font("굴림", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.lbl_rearOkNg.Location = new System.Drawing.Point(395, 162);
+            this.lbl_rearOkNg.Name = "lbl_rearOkNg";
+            this.lbl_rearOkNg.Size = new System.Drawing.Size(95, 54);
+            this.lbl_rearOkNg.TabIndex = 15;
+            this.lbl_rearOkNg.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // label31
             // 
@@ -622,49 +643,49 @@
             this.label31.Text = "종합";
             this.label31.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // label32
+            // lbl_totalWeight
             // 
-            this.label32.BackColor = System.Drawing.Color.White;
-            this.label32.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.label32.Font = new System.Drawing.Font("굴림", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.label32.Location = new System.Drawing.Point(101, 216);
-            this.label32.Name = "label32";
-            this.label32.Size = new System.Drawing.Size(92, 54);
-            this.label32.TabIndex = 17;
-            this.label32.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lbl_totalWeight.BackColor = System.Drawing.Color.White;
+            this.lbl_totalWeight.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lbl_totalWeight.Font = new System.Drawing.Font("굴림", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.lbl_totalWeight.Location = new System.Drawing.Point(101, 216);
+            this.lbl_totalWeight.Name = "lbl_totalWeight";
+            this.lbl_totalWeight.Size = new System.Drawing.Size(92, 54);
+            this.lbl_totalWeight.TabIndex = 17;
+            this.lbl_totalWeight.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // label33
+            // lbl_totalSum
             // 
-            this.label33.BackColor = System.Drawing.Color.White;
-            this.label33.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.label33.Font = new System.Drawing.Font("굴림", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.label33.Location = new System.Drawing.Point(199, 216);
-            this.label33.Name = "label33";
-            this.label33.Size = new System.Drawing.Size(92, 54);
-            this.label33.TabIndex = 18;
-            this.label33.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lbl_totalSum.BackColor = System.Drawing.Color.White;
+            this.lbl_totalSum.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lbl_totalSum.Font = new System.Drawing.Font("굴림", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.lbl_totalSum.Location = new System.Drawing.Point(199, 216);
+            this.lbl_totalSum.Name = "lbl_totalSum";
+            this.lbl_totalSum.Size = new System.Drawing.Size(92, 54);
+            this.lbl_totalSum.TabIndex = 18;
+            this.lbl_totalSum.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // label34
+            // lbl_totalDiff
             // 
-            this.label34.BackColor = System.Drawing.Color.White;
-            this.label34.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.label34.Font = new System.Drawing.Font("굴림", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.label34.Location = new System.Drawing.Point(297, 216);
-            this.label34.Name = "label34";
-            this.label34.Size = new System.Drawing.Size(92, 54);
-            this.label34.TabIndex = 19;
-            this.label34.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lbl_totalDiff.BackColor = System.Drawing.Color.White;
+            this.lbl_totalDiff.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lbl_totalDiff.Font = new System.Drawing.Font("굴림", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.lbl_totalDiff.Location = new System.Drawing.Point(297, 216);
+            this.lbl_totalDiff.Name = "lbl_totalDiff";
+            this.lbl_totalDiff.Size = new System.Drawing.Size(92, 54);
+            this.lbl_totalDiff.TabIndex = 19;
+            this.lbl_totalDiff.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // label35
+            // lbl_totalOkNg
             // 
-            this.label35.BackColor = System.Drawing.Color.White;
-            this.label35.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.label35.Font = new System.Drawing.Font("굴림", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.label35.Location = new System.Drawing.Point(395, 216);
-            this.label35.Name = "label35";
-            this.label35.Size = new System.Drawing.Size(95, 54);
-            this.label35.TabIndex = 20;
-            this.label35.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lbl_totalOkNg.BackColor = System.Drawing.Color.White;
+            this.lbl_totalOkNg.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lbl_totalOkNg.Font = new System.Drawing.Font("굴림", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.lbl_totalOkNg.Location = new System.Drawing.Point(395, 216);
+            this.lbl_totalOkNg.Name = "lbl_totalOkNg";
+            this.lbl_totalOkNg.Size = new System.Drawing.Size(95, 54);
+            this.lbl_totalOkNg.TabIndex = 20;
+            this.lbl_totalOkNg.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // label36
             // 
@@ -678,49 +699,49 @@
             this.label36.Text = "주차";
             this.label36.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // label37
+            // lbl_parkingWeight
             // 
-            this.label37.BackColor = System.Drawing.Color.White;
-            this.label37.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.label37.Font = new System.Drawing.Font("굴림", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.label37.Location = new System.Drawing.Point(101, 270);
-            this.label37.Name = "label37";
-            this.label37.Size = new System.Drawing.Size(92, 57);
-            this.label37.TabIndex = 22;
-            this.label37.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lbl_parkingWeight.BackColor = System.Drawing.Color.White;
+            this.lbl_parkingWeight.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lbl_parkingWeight.Font = new System.Drawing.Font("굴림", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.lbl_parkingWeight.Location = new System.Drawing.Point(101, 270);
+            this.lbl_parkingWeight.Name = "lbl_parkingWeight";
+            this.lbl_parkingWeight.Size = new System.Drawing.Size(92, 57);
+            this.lbl_parkingWeight.TabIndex = 22;
+            this.lbl_parkingWeight.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // label38
+            // lbl_parkingSum
             // 
-            this.label38.BackColor = System.Drawing.Color.White;
-            this.label38.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.label38.Font = new System.Drawing.Font("굴림", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.label38.Location = new System.Drawing.Point(199, 270);
-            this.label38.Name = "label38";
-            this.label38.Size = new System.Drawing.Size(92, 57);
-            this.label38.TabIndex = 23;
-            this.label38.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lbl_parkingSum.BackColor = System.Drawing.Color.White;
+            this.lbl_parkingSum.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lbl_parkingSum.Font = new System.Drawing.Font("굴림", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.lbl_parkingSum.Location = new System.Drawing.Point(199, 270);
+            this.lbl_parkingSum.Name = "lbl_parkingSum";
+            this.lbl_parkingSum.Size = new System.Drawing.Size(92, 57);
+            this.lbl_parkingSum.TabIndex = 23;
+            this.lbl_parkingSum.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // label39
+            // lbl_parkingDiff
             // 
-            this.label39.BackColor = System.Drawing.Color.White;
-            this.label39.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.label39.Font = new System.Drawing.Font("굴림", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.label39.Location = new System.Drawing.Point(297, 270);
-            this.label39.Name = "label39";
-            this.label39.Size = new System.Drawing.Size(92, 57);
-            this.label39.TabIndex = 24;
-            this.label39.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lbl_parkingDiff.BackColor = System.Drawing.Color.White;
+            this.lbl_parkingDiff.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lbl_parkingDiff.Font = new System.Drawing.Font("굴림", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.lbl_parkingDiff.Location = new System.Drawing.Point(297, 270);
+            this.lbl_parkingDiff.Name = "lbl_parkingDiff";
+            this.lbl_parkingDiff.Size = new System.Drawing.Size(92, 57);
+            this.lbl_parkingDiff.TabIndex = 24;
+            this.lbl_parkingDiff.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // label40
+            // lbl_parkingOkNg
             // 
-            this.label40.BackColor = System.Drawing.Color.White;
-            this.label40.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.label40.Font = new System.Drawing.Font("굴림", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.label40.Location = new System.Drawing.Point(395, 270);
-            this.label40.Name = "label40";
-            this.label40.Size = new System.Drawing.Size(95, 57);
-            this.label40.TabIndex = 25;
-            this.label40.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lbl_parkingOkNg.BackColor = System.Drawing.Color.White;
+            this.lbl_parkingOkNg.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lbl_parkingOkNg.Font = new System.Drawing.Font("굴림", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.lbl_parkingOkNg.Location = new System.Drawing.Point(395, 270);
+            this.lbl_parkingOkNg.Name = "lbl_parkingOkNg";
+            this.lbl_parkingOkNg.Size = new System.Drawing.Size(95, 57);
+            this.lbl_parkingOkNg.TabIndex = 25;
+            this.lbl_parkingOkNg.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // tableLayoutPanel4
             // 
@@ -1117,11 +1138,11 @@
             this.tableLayoutPanel6.Controls.Add(this.label54, 1, 1);
             this.tableLayoutPanel6.Controls.Add(this.label55, 2, 1);
             this.tableLayoutPanel6.Controls.Add(this.label56, 0, 2);
-            this.tableLayoutPanel6.Controls.Add(this.label57, 1, 2);
-            this.tableLayoutPanel6.Controls.Add(this.label58, 2, 2);
+            this.tableLayoutPanel6.Controls.Add(this.lbl_speedFourtyValue, 1, 2);
+            this.tableLayoutPanel6.Controls.Add(this.lbl_speedFourtyOkNg, 2, 2);
             this.tableLayoutPanel6.Controls.Add(this.label59, 0, 3);
-            this.tableLayoutPanel6.Controls.Add(this.label60, 1, 3);
-            this.tableLayoutPanel6.Controls.Add(this.label61, 2, 3);
+            this.tableLayoutPanel6.Controls.Add(this.lbl_speedMaxValue, 1, 3);
+            this.tableLayoutPanel6.Controls.Add(this.lbl_speedMaxOkNg, 2, 3);
             this.tableLayoutPanel6.Location = new System.Drawing.Point(552, 350);
             this.tableLayoutPanel6.Name = "tableLayoutPanel6";
             this.tableLayoutPanel6.RowCount = 4;
@@ -1180,27 +1201,27 @@
             this.label56.Text = "40[km/h]";
             this.label56.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // label57
+            // lbl_speedFourtyValue
             // 
-            this.label57.BackColor = System.Drawing.Color.White;
-            this.label57.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.label57.Font = new System.Drawing.Font("굴림", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.label57.Location = new System.Drawing.Point(167, 108);
-            this.label57.Name = "label57";
-            this.label57.Size = new System.Drawing.Size(159, 54);
-            this.label57.TabIndex = 5;
-            this.label57.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lbl_speedFourtyValue.BackColor = System.Drawing.Color.White;
+            this.lbl_speedFourtyValue.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lbl_speedFourtyValue.Font = new System.Drawing.Font("굴림", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.lbl_speedFourtyValue.Location = new System.Drawing.Point(167, 108);
+            this.lbl_speedFourtyValue.Name = "lbl_speedFourtyValue";
+            this.lbl_speedFourtyValue.Size = new System.Drawing.Size(159, 54);
+            this.lbl_speedFourtyValue.TabIndex = 5;
+            this.lbl_speedFourtyValue.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // label58
+            // lbl_speedFourtyOkNg
             // 
-            this.label58.BackColor = System.Drawing.Color.White;
-            this.label58.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.label58.Font = new System.Drawing.Font("굴림", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.label58.Location = new System.Drawing.Point(332, 108);
-            this.label58.Name = "label58";
-            this.label58.Size = new System.Drawing.Size(160, 54);
-            this.label58.TabIndex = 6;
-            this.label58.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lbl_speedFourtyOkNg.BackColor = System.Drawing.Color.White;
+            this.lbl_speedFourtyOkNg.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lbl_speedFourtyOkNg.Font = new System.Drawing.Font("굴림", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.lbl_speedFourtyOkNg.Location = new System.Drawing.Point(332, 108);
+            this.lbl_speedFourtyOkNg.Name = "lbl_speedFourtyOkNg";
+            this.lbl_speedFourtyOkNg.Size = new System.Drawing.Size(160, 54);
+            this.lbl_speedFourtyOkNg.TabIndex = 6;
+            this.lbl_speedFourtyOkNg.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // label59
             // 
@@ -1214,27 +1235,27 @@
             this.label59.Text = "최고[km/h]";
             this.label59.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // label60
+            // lbl_speedMaxValue
             // 
-            this.label60.BackColor = System.Drawing.Color.White;
-            this.label60.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.label60.Font = new System.Drawing.Font("굴림", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.label60.Location = new System.Drawing.Point(167, 162);
-            this.label60.Name = "label60";
-            this.label60.Size = new System.Drawing.Size(159, 54);
-            this.label60.TabIndex = 8;
-            this.label60.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lbl_speedMaxValue.BackColor = System.Drawing.Color.White;
+            this.lbl_speedMaxValue.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lbl_speedMaxValue.Font = new System.Drawing.Font("굴림", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.lbl_speedMaxValue.Location = new System.Drawing.Point(167, 162);
+            this.lbl_speedMaxValue.Name = "lbl_speedMaxValue";
+            this.lbl_speedMaxValue.Size = new System.Drawing.Size(159, 54);
+            this.lbl_speedMaxValue.TabIndex = 8;
+            this.lbl_speedMaxValue.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // label61
+            // lbl_speedMaxOkNg
             // 
-            this.label61.BackColor = System.Drawing.Color.White;
-            this.label61.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.label61.Font = new System.Drawing.Font("굴림", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.label61.Location = new System.Drawing.Point(332, 162);
-            this.label61.Name = "label61";
-            this.label61.Size = new System.Drawing.Size(160, 56);
-            this.label61.TabIndex = 9;
-            this.label61.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lbl_speedMaxOkNg.BackColor = System.Drawing.Color.White;
+            this.lbl_speedMaxOkNg.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lbl_speedMaxOkNg.Font = new System.Drawing.Font("굴림", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.lbl_speedMaxOkNg.Location = new System.Drawing.Point(332, 162);
+            this.lbl_speedMaxOkNg.Name = "lbl_speedMaxOkNg";
+            this.lbl_speedMaxOkNg.Size = new System.Drawing.Size(160, 56);
+            this.lbl_speedMaxOkNg.TabIndex = 9;
+            this.lbl_speedMaxOkNg.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // tableLayoutPanel7
             // 
@@ -1553,27 +1574,6 @@
             this.lbl_upward_rlr.TabIndex = 14;
             this.lbl_upward_rlr.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // Accept_No
-            // 
-            this.Accept_No.HeaderText = "접수번호";
-            this.Accept_No.MinimumWidth = 6;
-            this.Accept_No.Name = "Accept_No";
-            this.Accept_No.Width = 220;
-            // 
-            // Vin_No
-            // 
-            this.Vin_No.HeaderText = "차량번호";
-            this.Vin_No.MinimumWidth = 6;
-            this.Vin_No.Name = "Vin_No";
-            this.Vin_No.Width = 220;
-            // 
-            // Mea_Date
-            // 
-            this.Mea_Date.HeaderText = "측정시간";
-            this.Mea_Date.MinimumWidth = 6;
-            this.Mea_Date.Name = "Mea_Date";
-            this.Mea_Date.Width = 220;
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
@@ -1648,25 +1648,25 @@
         private System.Windows.Forms.Label label19;
         private System.Windows.Forms.Label label20;
         private System.Windows.Forms.Label label21;
-        private System.Windows.Forms.Label label22;
-        private System.Windows.Forms.Label label23;
-        private System.Windows.Forms.Label label24;
-        private System.Windows.Forms.Label label25;
+        private System.Windows.Forms.Label lbl_frontWeight;
+        private System.Windows.Forms.Label lbl_frontSum;
+        private System.Windows.Forms.Label lbl_frontDiff;
+        private System.Windows.Forms.Label lbl_frontOkNg;
         private System.Windows.Forms.Label label26;
-        private System.Windows.Forms.Label label27;
-        private System.Windows.Forms.Label label28;
-        private System.Windows.Forms.Label label29;
-        private System.Windows.Forms.Label label30;
+        private System.Windows.Forms.Label lbl_rearWeight;
+        private System.Windows.Forms.Label lbl_rearSum;
+        private System.Windows.Forms.Label lbl_rearDiff;
+        private System.Windows.Forms.Label lbl_rearOkNg;
         private System.Windows.Forms.Label label31;
-        private System.Windows.Forms.Label label32;
-        private System.Windows.Forms.Label label33;
-        private System.Windows.Forms.Label label34;
-        private System.Windows.Forms.Label label35;
+        private System.Windows.Forms.Label lbl_totalWeight;
+        private System.Windows.Forms.Label lbl_totalSum;
+        private System.Windows.Forms.Label lbl_totalDiff;
+        private System.Windows.Forms.Label lbl_totalOkNg;
         private System.Windows.Forms.Label label36;
-        private System.Windows.Forms.Label label37;
-        private System.Windows.Forms.Label label38;
-        private System.Windows.Forms.Label label39;
-        private System.Windows.Forms.Label label40;
+        private System.Windows.Forms.Label lbl_parkingWeight;
+        private System.Windows.Forms.Label lbl_parkingSum;
+        private System.Windows.Forms.Label lbl_parkingDiff;
+        private System.Windows.Forms.Label lbl_parkingOkNg;
         private System.Windows.Forms.Label label77;
         private System.Windows.Forms.Label label78;
         private System.Windows.Forms.Label label79;
@@ -1695,11 +1695,11 @@
         private System.Windows.Forms.Label label54;
         private System.Windows.Forms.Label label55;
         private System.Windows.Forms.Label label56;
-        private System.Windows.Forms.Label label57;
-        private System.Windows.Forms.Label label58;
+        private System.Windows.Forms.Label lbl_speedFourtyValue;
+        private System.Windows.Forms.Label lbl_speedFourtyOkNg;
         private System.Windows.Forms.Label label59;
-        private System.Windows.Forms.Label label60;
-        private System.Windows.Forms.Label label61;
+        private System.Windows.Forms.Label lbl_speedMaxValue;
+        private System.Windows.Forms.Label lbl_speedMaxOkNg;
         private System.Windows.Forms.Label label92;
         private System.Windows.Forms.Label lbl_incAngle;
         private System.Windows.Forms.Label label62;

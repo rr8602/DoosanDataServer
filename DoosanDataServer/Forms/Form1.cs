@@ -91,40 +91,37 @@ namespace DoosanDataServer
 
             if (e.EquipmentType == EquipmentType.HLT)
             {
-                if (e.Result.Length >= 20)
-                {
-                    currentChassisNumber = vinNo;
-                }
+                currentChassisNumber = vinNo;
 
                 ProcessHeadlightData(e.Result);
             }
             else if (e.EquipmentType == EquipmentType.WGT)
             {
-                if (e.Result.Length >= 9)
-                {
-                    currentChassisNumber = vinNo;
-                }
+                currentChassisNumber = vinNo;
 
                 ProcessWgtData(e.Result);
             }
             else if (e.EquipmentType == EquipmentType.ANG)
             {
-                if (e.Result.Length >= 5)
-                {
-                    currentChassisNumber = vinNo;
-                }
+                currentChassisNumber = vinNo;
 
                 ProcessAngData(e.Result);
+            }
+            else if (e.EquipmentType == EquipmentType.ABS)
+            {
+                currentChassisNumber = vinNo;
+
+                ProcessAbsData(e.Result);
             }
         }
 
         private void ProcessHeadlightData(string[] parts)
         {
-            if (parts.Length < 20)
+            /*if (parts.Length < 20)
             {
                 MessageBox.Show("헤드라이트 데이터 형식이 올바르지 않습니다.", "데이터 오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
-            }
+            }*/
 
             try
             {
@@ -209,11 +206,11 @@ namespace DoosanDataServer
 
         private void ProcessWgtData(string[] parts)
         {
-            if (parts.Length < 9)
+            /*if (parts.Length < 9)
             {
                 MessageBox.Show("중량계 데이터 형식이 올바르지 않습니다.", "데이터 오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
-            }
+            }*/
 
             try
             {
@@ -243,11 +240,11 @@ namespace DoosanDataServer
 
         private void ProcessAngData(string[] parts)
         {
-            if (parts.Length < 5)
+            /*if (parts.Length < 5)
             {
                 MessageBox.Show("경사각도 데이터 형식이 올바르지 않습니다.", "데이터 오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
-            }
+            }*/
 
             try
             {
@@ -257,8 +254,51 @@ namespace DoosanDataServer
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"경사각도 데이터 형식이 올바르지 않습니다. 오류: {ex.Message}", "데이터 오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"경사각도 데이터 처리 중 오류 : {ex.Message}", "처리 오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }   
+        }
+
+        private void ProcessAbsData(string[] parts)
+        {
+            try
+            {
+                // 브레이크
+                lbl_frontWeight.Text = (int.Parse(parts[15]) + int.Parse(parts[27]).ToString());
+                lbl_frontSum.Text = (int.Parse(parts[25]) + int.Parse(parts[37]).ToString());
+                lbl_frontDiff.Text = ((Math.Abs(int.Parse(parts[23]) - int.Parse(parts[35])) / (int.Parse(parts[23]) + int.Parse(parts[35])) / 2) * 100).ToString();
+                lbl_frontOkNg.Text = (parts[26] == "OK" && parts[38] == "OK") ? "OK" : "NG";
+                SetTextBoxColor(lbl_frontOkNg, lbl_frontOkNg.Text);
+
+                lbl_rearWeight.Text = (int.Parse(parts[39]) + int.Parse(parts[51]).ToString());
+                lbl_rearSum.Text = (int.Parse(parts[49]) + int.Parse(parts[61]).ToString());
+                lbl_rearDiff.Text = ((Math.Abs(int.Parse(parts[47]) - int.Parse(parts[59])) / (int.Parse(parts[47]) + int.Parse(parts[59])) / 2) * 100).ToString();
+                lbl_rearOkNg.Text = (parts[52] == "OK" && parts[62] == "OK") ? "OK" : "NG";
+                SetTextBoxColor(lbl_rearOkNg, lbl_rearOkNg.Text);
+
+                lbl_totalWeight.Text = (int.Parse(parts[75]) + int.Parse(parts[76]).ToString());
+                lbl_totalSum.Text = parts[77];
+                lbl_totalDiff.Text = ((Math.Abs(int.Parse(parts[75]) - int.Parse(parts[76])) / (int.Parse(parts[75]) + int.Parse(parts[76])) / 2) * 100).ToString();
+                lbl_totalOkNg.Text = parts[78];
+                SetTextBoxColor(lbl_totalOkNg, lbl_totalOkNg.Text);
+
+                lbl_parkingWeight.Text = (int.Parse(parts[80]) + int.Parse(parts[81]).ToString());
+                lbl_parkingSum.Text = parts[82];
+                lbl_parkingDiff.Text = ((Math.Abs(int.Parse(parts[80]) - int.Parse(parts[81])) / (int.Parse(parts[80]) + int.Parse(parts[81])) / 2) * 100).ToString();
+                lbl_parkingOkNg.Text = parts[83];
+                SetTextBoxColor(lbl_parkingOkNg, lbl_parkingOkNg.Text);
+
+                // 속도계 (40km/h 까지 4초 이하로 걸렸냐 + 속도계 최대값은 어떤 기준으로 해야 할지 모르겠다)
+                lbl_speedFourtyValue.Text = ((int.Parse(parts[86]) - int.Parse(parts[85])) / 1000).ToString();
+                lbl_speedFourtyOkNg.Text = int.Parse(lbl_speedFourtyValue.Text) < 4.0 ? "OK" : "NG";
+                SetTextBoxColor(lbl_speedFourtyOkNg, lbl_speedFourtyOkNg.Text);
+
+                //lbl_speedMaxValue.Text = parts[86];
+                //lbl_speedMaxOkNg.Text = 
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"ABS 데이터 처리 중 오류 : {ex.Message}", "처리 오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void SetTextBoxColor(Label label, string result)
