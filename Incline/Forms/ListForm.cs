@@ -9,17 +9,18 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Tab;
+
 namespace Incline.Forms
 {
     public partial class ListForm : Form
     {
-        public string SelectedAccpetNo { get; private set; }
+        public string SelectedVinNo { get; private set; }
         private SettingDb db;
 
         public ListForm(Form1 parent, SettingDb db)
         {
             InitializeComponent();
-            this.AutoScaleMode = AutoScaleMode.None;
             this.db = db;
             this.Load += ListForm_Load;
         }
@@ -27,8 +28,6 @@ namespace Incline.Forms
         private void ListForm_Load(object sender, EventArgs e)
         {
             dataGridView1.RowHeadersVisible = false;
-            date_start.Value = DateTime.Now.AddDays(-7);
-            date_end.Value = DateTime.Now;
             LoadDataFromDatabase();
         }
 
@@ -42,10 +41,9 @@ namespace Incline.Forms
                 {
                     con.Open();
 
-                    string query = @"SELECT Accept_No, Mea_Date, Inc_Angle 
-                                    FROM Incline 
+                    string query = @"SELECT Accept_No, Vin_No, Model, Inc_Angle, Inspection_Status, Ok_Ng, Mea_Date 
+                                    FROM Incline
                                     ORDER BY Mea_Date DESC";
-
 
                     using (OleDbCommand cmd = new OleDbCommand(query, con))
                     {
@@ -86,23 +84,33 @@ namespace Incline.Forms
                 while (reader.Read())
                 {
                     string acceptNo = reader["Accept_No"].ToString();
+                    string vinNo = reader["Vin_No"].ToString();
+                    string model = reader["Model"].ToString();
                     double IncAngle = Convert.ToDouble(reader["Inc_Angle"]);
+                    bool inspectionStatus = Convert.ToBoolean(reader["Inspection_Status"]);
+                    bool okNg = Convert.ToBoolean(reader["Ok_Ng"]);
                     DateTime measurementDate = Convert.ToDateTime(reader["Mea_Date"]);
 
-                    dataGridView1.Rows.Add(
-                        acceptNo,
-                        IncAngle.ToString("F1"),
-                        measurementDate.ToString("yyyy-MM-dd HH:mm:ss")
-                    );
+                    string todayDate = DateTime.Today.ToString("yyyyMMdd");
+
+                    if (acceptNo.StartsWith(todayDate))
+                    {
+                        dataGridView1.Rows.Add
+                        (
+                            acceptNo,
+                            vinNo,
+                            model,
+                            IncAngle.ToString("F1"),
+                            inspectionStatus ? "검사완료" : "검사대기",
+                            okNg ? "양호" : "불량",
+                            measurementDate.ToString("yyyy-MM-dd HH:mm:ss")
+                        );
+                    }
                 }
-            }
-            else
-            {
-                MessageBox.Show("검색 조건에 맞는 데이터가 없습니다.", "알림", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
 
-        private void SearchData(string accpetNo = "", DateTime? startDate = null, DateTime? endDate = null)
+        private void SearchData(string vinNo = "", DateTime? startDate = null, DateTime? endDate = null)
         {
             try
             {
@@ -112,16 +120,16 @@ namespace Incline.Forms
                 {
                     con.Open();
 
-                    string query = @"SELECT Accept_No, Mea_Date, Inc_Angle 
+                    string query = @"SELECT Accept_No, Vin_No, Model, Inc_Angle, Inspection_Status, Ok_Ng, Mea_Date
                                     FROM Incline WHERE 1=1";
 
                     List<OleDbParameter> parameters = new List<OleDbParameter>();
 
-                    // 바코드 검색 조건 추가
-                    if (!string.IsNullOrWhiteSpace(accpetNo))
+                    // 차대번호 검색 조건 추가
+                    if (!string.IsNullOrWhiteSpace(vinNo))
                     {
-                        query += " AND Accept_No LIKE ?";
-                        parameters.Add(new OleDbParameter("@Accept_No", OleDbType.VarChar) { Value = "%" + accpetNo + "%" });
+                        query += " AND Vin_No LIKE ?";
+                        parameters.Add(new OleDbParameter("@Vin_No", OleDbType.VarChar) { Value = "%" + vinNo + "%" });
                     }
 
                     // 날짜 검색 조건 추가
@@ -130,7 +138,8 @@ namespace Incline.Forms
                         query += " AND Mea_Date BETWEEN ? AND ?";
                         parameters.Add(new OleDbParameter("@StartDate", OleDbType.Date) { Value = startDate.Value });
 
-                        parameters.Add(new OleDbParameter("@EndDate", OleDbType.Date) { Value = endDate.Value });
+                        DateTime endDateWithTime = endDate.Value.Date.AddDays(1).AddSeconds(-1);
+                        parameters.Add(new OleDbParameter("@EndDate", OleDbType.Date) { Value = endDateWithTime });
                     }
 
                     // 결과 정렬
@@ -147,6 +156,11 @@ namespace Incline.Forms
                         using (OleDbDataReader reader = cmd.ExecuteReader())
                         {
                             DisplayData(reader);
+
+                            if (!reader.HasRows)
+                            {
+                                MessageBox.Show("검색 조건에 맞는 데이터가 없습니다.", "알림", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            }
                         }
                     }
 
@@ -163,7 +177,7 @@ namespace Incline.Forms
         {
             if (dataGridView1.SelectedRows.Count > 0)
             {
-                SelectedAccpetNo = dataGridView1.SelectedRows[0].Cells[0].Value.ToString();
+                SelectedVinNo = dataGridView1.SelectedRows[0].Cells[1].Value.ToString();
                 this.DialogResult = DialogResult.OK;
                 this.Close();
             }
@@ -177,7 +191,7 @@ namespace Incline.Forms
         {
             if (e.RowIndex >= 0)
             {
-                SelectedAccpetNo = dataGridView1.Rows[e.RowIndex].Cells[0].Value.ToString();
+                SelectedVinNo = dataGridView1.Rows[e.RowIndex].Cells[1].Value.ToString();
                 this.DialogResult = DialogResult.OK;
                 this.Close();
             }
@@ -185,38 +199,88 @@ namespace Incline.Forms
 
         private void btn_search_Click(object sender, EventArgs e)
         {
-            string accpetNo = txt_receptionNumber.Text.Trim();
+            string vinNo = txt_vinNo.Text.Trim();
 
-            DateTime startDate = date_start.Value.Date;
-            DateTime endDate = date_end.Value.Date;
+            DateTime? startDate = date_start.Checked ? date_start.Value.Date : (DateTime?)null;
+            DateTime? endDate = date_end.Checked ? date_end.Value.Date : (DateTime?)null;
 
-            // 접수번호만 입력
-            if (!string.IsNullOrEmpty(accpetNo) && startDate == endDate)
+            // 차대번호만 입력한 경우
+            if (!string.IsNullOrEmpty(vinNo) && !startDate.HasValue && !endDate.HasValue)
             {
-                SearchData(accpetNo: accpetNo);
+                SearchData(vinNo: vinNo);
             }
-            // 날짜만 선택
-            else if (string.IsNullOrEmpty(accpetNo) && startDate <= endDate)
+            // 날짜만 선택한 경우
+            else if (string.IsNullOrEmpty(vinNo) && startDate.HasValue && endDate.HasValue && startDate <= endDate)
             {
                 SearchData(startDate: startDate, endDate: endDate);
             }
-            // 접수번호와 날짜 모두 입력
-            else if (!string.IsNullOrEmpty(accpetNo) && startDate <= endDate)
+            // 차대번호와 날짜 모두 입력한 경우
+            else if (!string.IsNullOrEmpty(vinNo) && startDate.HasValue && endDate.HasValue && startDate <= endDate)
             {
-                SearchData(accpetNo: accpetNo, startDate: startDate, endDate: endDate);
+                SearchData(vinNo: vinNo, startDate: startDate, endDate: endDate);
             }
-            // 아무것도 입력되지 않거나 날짜 범위가 유효하지 않은 경우
+            // 시작 날짜만 선택한 경우
+            else if (startDate.HasValue && !endDate.HasValue)
+            {
+                SearchData(vinNo: vinNo, startDate: startDate, endDate: startDate); // 같은 날짜로 검색
+            }
+            // 종료 날짜만 선택한 경우
+            else if (!startDate.HasValue && endDate.HasValue)
+            {
+                SearchData(vinNo: vinNo, startDate: endDate, endDate: endDate); // 같은 날짜로 검색
+            }
+            // 날짜 범위가 유효하지 않은 경우
+            else if (startDate.HasValue && endDate.HasValue && startDate > endDate)
+            {
+                MessageBox.Show("검색 조건이 올바르지 않습니다.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            // 아무것도 입력되지 않은 경우
             else
             {
-                if (startDate > endDate)
+                LoadDataFromDatabase();
+            }
+        }
+
+        private void dataGridView1_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+        {
+            if (e.ColumnIndex == 4 && e.RowIndex >= 0 && e.Value != null)
+            {
+                string value = e.Value.ToString();
+
+                if (value == "양호")
                 {
-                    MessageBox.Show("검색 조건이 올바르지 않습니다.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    e.CellStyle.ForeColor = Color.Green;
+                    e.CellStyle.Font = new Font(dataGridView1.Font, FontStyle.Bold);
                 }
-                else
+                else if (value == "불량")
                 {
-                    // 모든 데이터 로드
-                    LoadDataFromDatabase();
+                    e.CellStyle.ForeColor = Color.Red;
+                    e.CellStyle.Font = new Font(dataGridView1.Font, FontStyle.Bold);
                 }
+            }
+            else if (e.ColumnIndex == 3 && e.RowIndex >= 0 && e.Value != null)
+            {
+                string value = e.Value.ToString();
+
+                if (value == "검사대기")
+                {
+                    e.CellStyle.ForeColor = Color.Red;
+                    e.CellStyle.Font = new Font(dataGridView1.Font, FontStyle.Bold);
+                }
+            }
+        }
+
+        private void DateTimePicker_ValueChanged(object sender, EventArgs e)
+        {
+            DateTimePicker dtp = (DateTimePicker)sender;
+
+            if (dtp.Checked)
+            {
+                dtp.CustomFormat = "yyyy-MM-dd";
+            }
+            else
+            {
+                dtp.CustomFormat = " ";
             }
         }
     }

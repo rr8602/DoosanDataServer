@@ -14,9 +14,11 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -39,23 +41,36 @@ namespace Incline
         private string currentManufacturer;
 
         private float currentValue = 0.0f;
-        private IOBoard ioBoard;
-        private Timer ioTimer;
+        private IoBoard ioBoard;
+        private System.Windows.Forms.Timer ioTimer;
         private byte currentOutputState = 0;
         private int currentSequence = 1;
         private bool requestSent = false;
         private SettingDb db;
 
-        // INI파일 데이터
+        // INI 파일 데이터
         private string ipAddress;
-        private string portNumber;
+        private int portNumber;
+        private double maxInclineAngle;// 최대 경사각도
+        private double minInclineAngle; // 최소 경사각도
         private string iniFilePath = Path.Combine(Application.StartupPath, "Config", "Incline.ini");
 
-        public string vehicleBarcode { get; private set; }
-        public string formattedBarcode { get; private set; }
+        // TCP 연결 관련 변수
+        private TcpClient tcpClient;
+        private NetworkStream clientStream;
+        private bool isConnected = false;
+        private Thread listenThread;
+        private bool isListening = false;
+
+        public string acceptNo { get; private set; }
+        public string vinNo { get; private set; }
+        public string model { get; private set; }
+        public DateTime meaDate { get; private set; }
         public double inclineAngle { get; private set; }
 
-        private TextBox txt_vinNo;
+        public bool okNg { get; private set; }
+
+        public bool inspectionStatus { get; private set; }
 
         public void MotorOn() => SetOutputPin(MOTOR, true);
         public void MotorOff() => SetOutputPin(MOTOR, false);
@@ -84,28 +99,9 @@ namespace Incline
 
             db = new SettingDb(this);
 
-            btn_inspectionStart.Enabled = false;
-
             LoadConfigFromIni();
             db.SetupDatabaseConnection();
-            SetupTcpServer();
             InitializeIOBoard();
-        }
-
-        private void SetupTcpServer()
-        {
-            try
-            {
-                tcpServer = new TcpServer("192.168.10.98", 5000);
-                tcpServer.VehicleInfoReceived += TcpServer_VehicleInfoReceived;
-                tcpServer.PacketReceived += TcpServer_PacketReceived;
-                tcpServer.ServerLog += TcpServer_ServerLog;
-                tcpServer.Start();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"TCP 서버 설정 중 오류가 발생했습니다: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
         }
 
         public void LoadConfigFromIni()
@@ -115,7 +111,9 @@ namespace Incline
                 IniFile iniFile = new IniFile(iniFilePath);
 
                 ipAddress = iniFile.ReadString("Network", "IP");
-                portNumber = iniFile.ReadString("Network", "Port");
+                portNumber = iniFile.ReadInteger("Network", "Port");
+                maxInclineAngle = iniFile.ReadDouble("Network", "MaxAngle", 90.0);
+                minInclineAngle = iniFile.ReadDouble("Network", "MinAngle", 0.0);
             }
             catch (Exception ex)
             {
@@ -125,12 +123,13 @@ namespace Incline
 
         private void InitializeIOBoard()
         {
-            ioBoard = new IOBoard();
+            ioBoard = new IoBoard();
 
             ioBoard.OnInputDataReceived += IoBoard_OnInputDataReceived;
             ioBoard.onOutputDataSent += IoBoard_OnOutputDataSent;
+            ioBoard.OnRxDataReceived += IoBoard_OnRxDataReceived;
 
-            ioTimer = new Timer();
+            ioTimer = new System.Windows.Forms.Timer();
             ioTimer.Interval = 200;
             ioTimer.Tick += IoTimer_Tick;
         }
@@ -144,11 +143,46 @@ namespace Incline
             }
         }
 
+        private void IoBoard_OnRxDataReceived(RxData rxData)
+        {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new IoBoard.RxDataReceivedHandler(IoBoard_OnRxDataReceived), rxData);
+
+                return;
+            }
+
+            if (float.TryParse(rxData.DataAsString, out float angle))
+            {
+                currentValue = angle;
+                lbl_arcGaugeValue.Text = currentValue.ToString("0.0");
+                lbl_incAngle.Text = currentValue.ToString("0.0");
+                inclineAngle = angle;
+
+                if (angle > maxInclineAngle)
+                {
+                    lbl_okNg.Text = "NG";
+                    lbl_okNg.BackColor = Color.Red;
+                    lbl_okNg.ForeColor = Color.White;
+                }
+                else
+                {
+                    lbl_okNg.Text = "OK";
+                    lbl_okNg.BackColor = Color.Green;
+                    lbl_okNg.ForeColor = Color.White;
+                }
+
+                panel_arcGauge.Invalidate();
+            }
+
+            ControlByInclineAngle(angle);
+        }
+
         private void IoBoard_OnInputDataReceived(byte data)
         {
             if (this.InvokeRequired)
             {
-                this.Invoke(new IOBoard.DataReceivedHandler(IoBoard_OnInputDataReceived), data);
+                this.Invoke(new IoBoard.DataReceivedHandler(IoBoard_OnInputDataReceived), data);
 
                 return;
             }
@@ -163,18 +197,21 @@ namespace Incline
             UpdateUIBasedOnInputs(inputs);
 
             int inputValue = data & 0x7F; // 하위 7비트만 사용
-            currentValue = (inputValue / 127.0f) * 90.0f; // 0-127 값을 0-90도로 변환
 
-            lbl_arcGaugeValue.Text = currentValue.ToString("0.0");
-            lbl_incAngle.Text = inputValue.ToString("0.0");
-            panel_arcGauge.Invalidate();
+            if (Math.Abs(currentValue - ((inputValue / 127.0f) * 90.0f)) > 0.1f)
+            {
+                currentValue = (inputValue / 127.0f) * 90.0f; // 0-127 값을 0-90도로 변환
+                lbl_arcGaugeValue.Text = currentValue.ToString("0.0");
+                lbl_incAngle.Text = currentValue.ToString("0.0");
+                panel_arcGauge.Invalidate();
+            }
         }
 
         private void IoBoard_OnOutputDataSent(byte outputData, bool success)
         {
             if (this.InvokeRequired)
             {
-                this.Invoke(new IOBoard.OutputDataHandler(IoBoard_OnOutputDataSent), outputData, success);
+                this.Invoke(new IoBoard.OutputDataHandler(IoBoard_OnOutputDataSent), outputData, success);
 
                 return;
             }
@@ -203,6 +240,8 @@ namespace Incline
             {
                 requestSent = false;
                 ioTimer.Start();
+
+                lbl_message.Text = "IO 보드 연결 성공";
             }
             else
             {
@@ -243,27 +282,14 @@ namespace Incline
         private void panel_arcGauge_Paint(object sender, PaintEventArgs e)
         {
             Graphics g = e.Graphics;
-            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            g.SmoothingMode = SmoothingMode.AntiAlias;
 
             // 배경
             int width = panel_arcGauge.Width;
             int height = panel_arcGauge.Height;
-            int centerX = width / 3;
-            int centerY = height - 50;
-            int radius = (int)(Math.Min(width, height) * 2);
-
-            if (centerX + radius > width)
-            {
-                radius = width - centerX - 20;
-            }
-            if (centerY - radius < 0)
-            {
-                radius = centerY - 20;
-            }
-            if (centerX - radius < 0)
-            {
-                centerX = radius + 20;
-            }
+            int centerX = width - 350;
+            int centerY = height - 60;
+            int radius = width - 550;
 
             // 기본 아크 배경 (아이보리)
             g.FillPie(Brushes.Ivory, centerX - radius, centerY - radius, radius * 2, radius * 2, 90, 90);
@@ -304,11 +330,11 @@ namespace Incline
             }
 
             // 수평선 그리기 (파란색 영역)
-            float horizontalLineY = centerY + 2;
-            g.FillRectangle(Brushes.Blue, centerX - radius, horizontalLineY - 5, radius, 10);
+            float horizontalLineY = centerY;
+            g.FillRectangle(Brushes.Black, centerX - radius, horizontalLineY - 2, radius, 4);
 
             // 현재 값에 해당하는 포인터
-            DrawPointer(g, centerX, centerY, radius, 0);
+            DrawPointer(g, centerX, centerY, radius, currentValue);
         }
         private void DrawColoredSegments(Graphics g, int centerX, int centerY, int radius)
         {
@@ -380,14 +406,11 @@ namespace Incline
             float pointerEndX = centerX + (float)(Math.Cos(radians) * (radius - 40));
             float pointerEndY = centerY - (float)(Math.Sin(radians) * (radius - 40));
 
-            g.DrawLine(new Pen(Color.DarkBlue, 3), centerX, centerY, pointerEndX, pointerEndY);
-
-            float horizontalLineEndX = centerX;
-            float horizontalLineY = centerY + 2;
-
-            g.FillEllipse(Brushes.Blue, horizontalLineEndX - 10, horizontalLineY - 10, 20, 20);
+            g.DrawLine(new Pen(Color.Blue, 3), centerX, centerY, pointerEndX, pointerEndY);
+            g.FillEllipse(Brushes.Black, centerX - 5, centerY - 5, 10, 10);
         }
 
+        // 센서가 없을 때, 사용하는 경사각도 값 계산 메서드
         private double GetCurrentInclination()
         {
             Random rand = new Random();
@@ -395,6 +418,11 @@ namespace Incline
 
             this.inclineAngle = angle;
             this.lbl_incAngle.Text = angle.ToString("0.00") + "°";
+            this.currentValue = (float)angle;
+            this.lbl_arcGaugeValue.Text = currentValue.ToString("0.0");
+            this.inspectionStatus = true;
+
+            panel_arcGauge.Invalidate();
 
             return angle;
         }
@@ -402,13 +430,17 @@ namespace Incline
         // 경사각도에 따른 동작 제어 (센서가 있을 시, IoTimer_Tick에 구현)
         public void ControlByInclineAngle(double angle)
         {
-            if (angle >= 40.0)
+            if (angle >= maxInclineAngle)
             {
                 MotorOff();
                 BuzzerOn();
                 LampRedOn();
                 LampGreenOff();
-                lbl_message.Text = "경고: 각도 초과! 모터 OFF, 경보 ON";
+                lbl_message.Text = "경고: 각도 초과!";
+
+                lbl_okNg.Text = "NG";
+                lbl_okNg.BackColor = Color.Red;
+                lbl_okNg.ForeColor = Color.White;
             }
             else
             {
@@ -417,44 +449,200 @@ namespace Incline
                 LampRedOff();
                 LampGreenOn();
                 lbl_message.Text = "정상 동작";
+
+                lbl_okNg.Text = "OK";
+                lbl_okNg.BackColor = Color.Green;
+                lbl_okNg.ForeColor = Color.White;
             }
         }
 
-        public string SendWeightDataToServer()
+        private void SetupTcpConnection()
         {
-            string datePrefix = DateTime.Now.ToString("yyyyMMdd");
-            string sequentialNumber = currentSequence.ToString("D4"); // 4자리 순차번호
-            currentSequence++;
-            formattedBarcode = datePrefix + sequentialNumber;
+            try
+            {
+                tcpClient = new TcpClient();
+                tcpClient.Connect(ipAddress, portNumber);
+                clientStream = tcpClient.GetStream();
+                isConnected = true;
 
-            string incData = string.Format(CultureInfo.InvariantCulture, "{0}/{1:F2}", formattedBarcode, inclineAngle);
+                // 연결 후 서버 응답 수신을 위한 스레드 시작
+                StartListening();
 
-            int dataCount = 2;
-            string packet = $"<RST/ANG/{incData}/{dataCount}>";
+                Console.WriteLine("서버에 연결되었습니다.");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"서버 연결 중 오류가 발생했습니다: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void StartListening()
+        {
+            if (isListening)
+                return;
+
+            isListening = true;
+            listenThread = new Thread(new ThreadStart(ListenForData));
+            listenThread.IsBackground = true;
+            listenThread.Start();
+        }
+
+        private void ListenForData()
+        {
+            byte[] buffer = new byte[64];
 
             try
             {
-                using (TcpClient client = new TcpClient())
+                while (isListening && isConnected && tcpClient != null && tcpClient.Connected)
                 {
-                    client.Connect(ipAddress, int.Parse(portNumber));
-
-                    using (NetworkStream stream = client.GetStream())
+                    // 데이터를 수신할 수 있는지 확인
+                    if (clientStream.DataAvailable)
                     {
-                        byte[] bytes = Encoding.GetEncoding("EUC-KR").GetBytes(packet);
-                        stream.Write(bytes, 0, bytes.Length);
-                        stream.Flush();
+                        int bytesRead = clientStream.Read(buffer, 0, buffer.Length);
+
+                        if (bytesRead > 0)
+                        {
+                            string receivedData = Encoding.GetEncoding("EUC-KR").GetString(buffer, 0, bytesRead);
+                            Console.WriteLine($"[{DateTime.Now}] 데이터 수신: {receivedData}");
+                            ProcessReceivedData(receivedData);
+                        }
+                    }
+
+                    Thread.Sleep(100);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[{DateTime.Now}] ListenForData 예외 발생: {ex.Message}");
+
+                try
+                {
+                    // 핸들이 생성되었는지 확인 후 Invoke 호출
+                    if (this.IsHandleCreated)
+                    {
+                        this.Invoke((MethodInvoker)delegate
+                        {
+                            Console.WriteLine($"서버와의 연결이 끊어졌습니다: {ex.Message}");
+                        });
+                    }
+                    else
+                    {
+                        Console.WriteLine("폼 핸들이 생성되지 않아 UI 업데이트를 건너뜁니다.");
                     }
                 }
+                catch (Exception invokeEx)
+                {
+                    Console.WriteLine($"UI 업데이트 중 오류: {invokeEx.Message}");
+                }
 
-                Console.WriteLine("데이터 전송 성공 : " + packet);
+                isConnected = false;
+            }
+            finally
+            {
+                Console.WriteLine($"[{DateTime.Now}] ListenForData 메서드 종료됨");
+            }
+        }
 
-                return formattedBarcode;
+        private void ProcessReceivedData(string data)
+        {
+            try
+            {
+                if (this.IsHandleCreated)
+                {
+                    this.Invoke((MethodInvoker)delegate
+                    {
+                        Console.WriteLine($"수신된 데이터: {data}");
+
+                        if (data.Contains("<WHO/1>"))
+                        {
+                            SendResponse("<CON/ANG/OK/3>");
+                        }
+                        else if (data.Contains("REG"))
+                        {
+                            string[] result = data.Split('/');
+
+                            acceptNo = result[2];
+                            vinNo = result[3];
+                            model = result[4];
+
+                            lbl_currentVehicle.Text = vinNo;
+
+                            Console.WriteLine($"REG 수신된 데이터: {data}");
+                        }
+                    });
+                }
+                else
+                {
+                    Console.WriteLine($"[{DateTime.Now}] 데이터 수신됨 (UI 업데이트 불가): {data}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"ProcessReceivedData 예외: {ex.Message}");
+            }
+        }
+
+        private void SendResponse(string response)
+        {
+            try
+            {
+                if (tcpClient != null && tcpClient.Connected)
+                {
+                    byte[] data = Encoding.GetEncoding("EUC-KR").GetBytes(response);
+                    clientStream.Write(data, 0, data.Length);
+                    clientStream.Flush();
+
+                    Console.WriteLine($"응답 전송 성공: {response}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"응답 전송 실패: {ex.Message}");
+            }
+        }
+
+        public void SendInclineDataToServer()
+        {
+            string incData = string.Format(CultureInfo.InvariantCulture, "{0}/{1:F2}", acceptNo, inclineAngle);
+
+            string packet = $"<RST/ANG/{incData}>";
+            int dataCount = packet.Split('/').Length + 1;
+
+            string packetResult = $"<RST/ANG/{incData}/{dataCount}>";
+
+            try
+            {
+                // 기존 연결을 사용하여 데이터 전송
+                if (isConnected && tcpClient != null && tcpClient.Connected)
+                {
+                    byte[] bytes = Encoding.GetEncoding("EUC-KR").GetBytes(packetResult);
+                    clientStream.Write(bytes, 0, bytes.Length);
+                    clientStream.Flush();
+
+                    Console.WriteLine("데이터 전송 성공 : " + packetResult);
+                }
+                else
+                {
+                    // 연결이 없는 경우 새로 연결 시도
+                    SetupTcpConnection();
+
+                    if (isConnected)
+                    {
+                        byte[] bytes = Encoding.GetEncoding("EUC-KR").GetBytes(packetResult);
+                        clientStream.Write(bytes, 0, bytes.Length);
+                        clientStream.Flush();
+
+                        Console.WriteLine("데이터 전송 성공 : " + packetResult);
+                    }
+                    else
+                    {
+                        MessageBox.Show("서버에 연결되어 있지 않습니다.", "전송 오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
             }
             catch (Exception ex)
             {
                 MessageBox.Show("서버 전송 실패: " + ex.Message, "전송 오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
-
-                return "";
             }
         }
 
@@ -470,42 +658,81 @@ namespace Incline
             return true;
         }
 
+        private void SetMultipleOutputPins(int[] pinNumbers, bool state)
+        {
+            if (pinNumbers == null|| pinNumbers.Length == 0) return;
+
+            foreach (int pin in pinNumbers)
+            {
+                if (pin >= 0 && pin <= 7)
+                {
+                    if (state)
+                        currentOutputState |= (byte)(1 << pin);
+                    else
+                        currentOutputState &= (byte)~(1 << pin);
+                }
+            }
+
+            SetOutput(currentOutputState);
+        }
+
+        // 0,1,3 핀 동시 출력
+        public void LiftUpOnSignal(bool state)
+        {
+            if (state)
+            {
+                int[] pins = { MOTOR, BUZZER, LIFT_DOWN };
+                SetMultipleOutputPins(pins, state);
+            }
+        }
+
+        // 0,2,3 핀 동시 출력
+        public void LiftDownOnSignal(bool state)
+        {
+            if (state)
+            {
+                int[] pins = { MOTOR, LIFT_UP, LIFT_DOWN };
+                SetMultipleOutputPins(pins, state);
+            }
+        }
+
+        public void LiftOffSignal()
+        {
+            currentOutputState = 0;
+            SetOutput(currentOutputState);
+        }
+
         private void Form1_Load(object sender, EventArgs e)
         {
             lbl_message.Text = "초기화중";
             lbl_arcGaugeValue.Text = "0.0";
             lbl_incAngle.Text = "0.0";
 
+            currentValue = 0.0f;
+
             panel_arcGauge.Invalidate();
 
-            string[] ports = System.IO.Ports.SerialPort.GetPortNames();
-
-            cmb_ports.Items.Clear();
-            cmb_ports.Items.AddRange(ports);
-            if (ports.Length > 0)
-                cmb_ports.SelectedIndex = 0;
+            SetupTcpConnection();
         }
 
-        private void btn_motorOn_Click(object sender, EventArgs e)
+        private void btn_liftUp_MouseDown(object sender, MouseEventArgs e)
         {
-            MotorOn();
+            LiftUpOnSignal(true);
         }
 
-        private void btn_motorOff_Click(object sender, EventArgs e)
+        private void btn_liftUp_MouseUp(object sender, MouseEventArgs e)
         {
-            MotorOff();
+            LiftOffSignal();
         }
 
-        private void btn_refreshPorts_Click(object sender, EventArgs e)
+        private void btn_liftDown_MouseDown(object sender, MouseEventArgs e)
         {
-            cmb_ports.Items.Clear();
-            string[] ports = System.IO.Ports.SerialPort.GetPortNames();
-            cmb_ports.Items.AddRange(ports);
+            LiftDownOnSignal(true);
+        }
 
-            if (ports.Length > 0)
-                cmb_ports.SelectedIndex = 0;
-            else
-                MessageBox.Show("사용 가능한 COM 포트가 없습니다.", "알림", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        private void btn_liftDown_MouseUp(object sender, MouseEventArgs e)
+        {
+            LiftOffSignal();
         }
 
         // 기존 FormClosing 이벤트 핸들러를 수정
@@ -527,6 +754,30 @@ namespace Incline
                 }
             }
 
+            try
+            {
+                isListening = false;
+
+                if (listenThread != null && listenThread.IsAlive)
+                {
+                    listenThread.Join(1000); // 최대 1초 대기
+                }
+
+                if (clientStream != null)
+                {
+                    clientStream.Close();
+                }
+
+                if (tcpClient != null)
+                {
+                    tcpClient.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"TCP 연결 종료 중 오류: {ex.Message}");
+            }
+
             ioTimer?.Dispose();
         }
 
@@ -536,16 +787,9 @@ namespace Incline
             this.Close();
         }
 
-        private void btn_connect_Click(object sender, EventArgs e)
-        {
-            string portName = cmb_ports.SelectedItem as string;
-
-            ConnectIOBoard(portName);
-        }
-
         private void btn_config_Click(object sender, EventArgs e)
         {
-            using (ConfigForm configForm = new ConfigForm())
+            using (ConfigForm configForm = new ConfigForm(this))
             {
                 configForm.ShowDialog();
             }
@@ -557,7 +801,7 @@ namespace Incline
             {
                 if (listform.ShowDialog() == DialogResult.OK)
                 {
-                    lbl_currentVehicle.Text = listform.SelectedAccpetNo;
+                    lbl_currentVehicle.Text = listform.SelectedVinNo;
 
                     db.SetListForm(listform);
                 }
@@ -566,29 +810,34 @@ namespace Incline
 
         private void btn_inspectionStart_Click(object sender, EventArgs e)
         {
-            string acceptNo = string.Empty;
             double angle;
 
-            vehicleBarcode = currentChassisNumber;
+            vinNo = lbl_currentVehicle.Text;
 
-            if (ioBoard.isConnected == false)
+            if (ioBoard.IsConnected == false)
             {
                 MessageBox.Show("IO 보드에 연결되어 있지 않습니다. 먼저 연결해주세요.", "연결 오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
             else
             {
-                if (!string.IsNullOrEmpty(vehicleBarcode))
+                if (!string.IsNullOrEmpty(vinNo))
                 {
-                    if (ValidateBarcode(vehicleBarcode))
+                    if (ValidateBarcode(vinNo))
                     {
-                        lbl_currentVehicle.Text = vehicleBarcode;
+                        lbl_currentVehicle.Text = vinNo;
+
+                        //ioBoard.SendCommand();
+                        lbl_message.Text = "센서 데이터 요청 중...";
+
+                        inspectionStatus = true;
+
+                        // 센서 연결 시, 실제 검사 결과 처리는 IoBoard_OnRxDataReceived 에서 처리됨
 
                         angle = GetCurrentInclination();
                         ControlByInclineAngle(angle);
-
-                        acceptNo = SendWeightDataToServer();
-                        db.SaveMeasurementDataToMDB(acceptNo, vehicleBarcode);
+                        SendInclineDataToServer();
+                        meaDate = DateTime.Now;
                     }
                     else
                     {
@@ -602,7 +851,7 @@ namespace Incline
             }
         }
 
-        private void TcpServer_VehicleInfoReceived(object sender, VehicleInfoEventArgs e)
+        /*private void TcpServer_VehicleInfoReceived(object sender, VehicleInfoEventArgs e)
         {
             if (InvokeRequired)
             {
@@ -662,14 +911,14 @@ namespace Incline
             {
                 MessageBox.Show($"패킷 처리 중 오류 발생: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-        }
+        }*/
 
         private void TcpServer_ServerLog(object sender, string e)
         {
             Console.WriteLine(e);
         }
 
-        private void UpdateStatusMessage(string title, string message)
+        /*private void UpdateStatusMessage(string title, string message)
         {
             if (lbl_title != null && lbl_message != null)
             {
@@ -678,6 +927,48 @@ namespace Incline
             }
 
             Console.WriteLine($"[{DateTime.Now}] State : {title} - {message}");
+        }*/
+
+        private bool confirmOkNg()
+        {
+            double angle;
+            string text = lbl_incAngle.Text.Replace("°", "");
+
+            if (double.TryParse(text, out angle))
+            {
+                return angle <= maxInclineAngle;
+            }
+
+            return false;
+        }
+
+        private void btn_save_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                okNg = confirmOkNg(); 
+
+                if (acceptNo != "" && vinNo != "")
+                {
+                    db.SaveMeasurementDataToMDB(acceptNo, vinNo, model, okNg, inspectionStatus, meaDate);
+                }
+                else
+                {
+                    MessageBox.Show("접수번호나 차대번호가 없습니다.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("데이터 저장 중 오류가 발생했습니다: " + ex.Message, "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+        }
+
+        private void btn_io_Click(object sender, EventArgs e)
+        {
+            IoBoardForm ioBoardForm = new IoBoardForm();
+
+            ioBoardForm.Show();
         }
     }
 }

@@ -59,8 +59,10 @@ namespace Incline.Comm
 
         public TcpServer(string ipAddress, int port)
         {
-            IPAddress address = ipAddress == null ? IPAddress.Any : IPAddress.Parse(ipAddress);
-            _listener = new TcpListener(address, port);
+            /*IPAddress address = ipAddress == null ? IPAddress.Any : IPAddress.Parse(ipAddress);
+            _listener = new TcpListener(address, port);*/
+
+            _listener = new TcpListener(IPAddress.Any, port);
         }
 
         public void Start()
@@ -242,7 +244,7 @@ namespace Incline.Comm
             // WHO 명령어: 설비 인증 요청 - 서버가 Incline 설비인지 확인
             if (command == Packet.CMD_WHO && source == Packet.SRC_SVR)
             {
-                string response = _packetHandler.CreatePacket(Packet.CMD_CON, Packet.SRC_SVR, Packet.RESULT_OK, 3);
+                string response = _packetHandler.CreatePacket(Packet.CMD_CON, Packet.SRC_ANG, Packet.RESULT_OK, 3);
                 SendData(client, response);
                 LogMessage("WHO 명령에 응답: 설비 인증 확인");
             }

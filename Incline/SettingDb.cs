@@ -74,9 +74,9 @@ namespace Incline
         }
 
         // DB에 측정 데이터 저장 or 수정
-        public void SaveMeasurementDataToMDB(string acceptNo = null, string vinNo = null)
+        public void SaveMeasurementDataToMDB(string acceptNo = null, string vinNo = null, string model = null, bool okNg = true, bool inspectionStatus = true, DateTime meaDate = default)
         {
-            string vehicleAcceptNo = acceptNo ?? (listForm?.SelectedAccpetNo ?? string.Empty);
+            string vehicleAcceptNo = vinNo ?? (listForm?.SelectedVinNo ?? string.Empty);
 
             if (string.IsNullOrEmpty(vehicleAcceptNo))
             {
@@ -90,12 +90,12 @@ namespace Incline
                 {
                     con.Open();
 
-                    // AcceptNo가 이미 존재하는지 확인
-                    string checkSql = "SELECT COUNT(*) FROM Incline WHERE Accept_No = ?";
+                    // 차대번호가 이미 존재하는지 확인
+                    string checkSql = "SELECT COUNT(*) FROM Incline WHERE Vin_No = ?";
 
                     using (OleDbCommand checkCmd = new OleDbCommand(checkSql, con))
                     {
-                        checkCmd.Parameters.Add("@AcceptNo", OleDbType.VarChar).Value = acceptNo;
+                        checkCmd.Parameters.Add("@Vin_No", OleDbType.VarChar).Value = vinNo;
 
                         int count = (int)checkCmd.ExecuteScalar();
 
@@ -103,17 +103,23 @@ namespace Incline
                         {
                             // 기존 데이터가 존재하면 UPDATE 수행
                             string updateSql = @"UPDATE Incline
-                                         SET Mea_Date = ?, 
-                                             Inc_Angle = ?.
-                                             Vin_No = ?
-                                         WHERE Accept_No = ?";
+                                         SET Mea_Date = ?,
+                                             OK_Ng = ?,
+                                             Inspection_Status = ?,
+                                             Inc_Angle = ?,
+                                             Accept_No = ?,
+                                                Model = ?
+                                         WHERE Vin_No = ?";
 
                             using (OleDbCommand updateCmd = new OleDbCommand(updateSql, con))
                             {
-                                updateCmd.Parameters.Add("@Mea_Date", OleDbType.Date).Value = DateTime.Now;
+                                updateCmd.Parameters.Add("@Mea_Date", OleDbType.Date).Value = meaDate;
+                                updateCmd.Parameters.Add("@OK_Ng", OleDbType.Boolean).Value = okNg;
+                                updateCmd.Parameters.Add("@Inspection_Status", OleDbType.Boolean).Value = inspectionStatus;
                                 updateCmd.Parameters.Add("@Inc_Angle", OleDbType.Double).Value = form.inclineAngle;
-                                updateCmd.Parameters.Add("@Vin_No", OleDbType.VarChar).Value = vinNo;
                                 updateCmd.Parameters.Add("@Accept_No", OleDbType.VarChar).Value = acceptNo;
+                                updateCmd.Parameters.Add("@Model", OleDbType.VarChar).Value = model;
+                                updateCmd.Parameters.Add("@Vin_No", OleDbType.VarChar).Value = vinNo;
                                 updateCmd.ExecuteNonQuery();
                             }
                         }
@@ -121,16 +127,19 @@ namespace Incline
                         {
                             // 기존 데이터가 없으면 INSERT 수행
                             string insertSql = @"INSERT INTO Incline
-                                         (Accept_No, Vin_No, Mea_Date, Inc_Angle)
+                                         (Accept_No, Vin_No, Model, Inc_Angle, Inspection_Status, Ok_Ng, Mea_Date)
                                          VALUES
-                                         (?, ?, ?, ?)";
+                                         (?, ?, ?, ?, ?, ?, ?)";
 
                             using (OleDbCommand insertCmd = new OleDbCommand(insertSql, con))
                             {
                                 insertCmd.Parameters.Add("@Accept_No", OleDbType.VarChar).Value = acceptNo;
                                 insertCmd.Parameters.Add("@Vin_No", OleDbType.VarChar).Value = vinNo;
-                                insertCmd.Parameters.Add("@Mea_Date", OleDbType.Date).Value = DateTime.Now;
+                                insertCmd.Parameters.Add("@Model", OleDbType.VarChar).Value = model;
                                 insertCmd.Parameters.Add("@Inc_Angle", OleDbType.Double).Value = form.inclineAngle;
+                                insertCmd.Parameters.Add("@Inspection_Status", OleDbType.Boolean).Value = inspectionStatus;
+                                insertCmd.Parameters.Add("@Ok_Ng", OleDbType.Boolean).Value = okNg;
+                                insertCmd.Parameters.Add("@Mea_Date", OleDbType.Date).Value = meaDate;
                                 insertCmd.ExecuteNonQuery();
                             }
                         }

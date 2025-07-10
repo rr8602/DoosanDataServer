@@ -60,7 +60,19 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Comm\TcpServer.cs" />
+    <Compile Include="Forms\IoBoardForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\IoBoardForm.Designer.cs">
+      <DependentUpon>IoBoardForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Models\Packet.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="RxData.cs" />
     <Compile Include="SettingDb.cs" />
     <Compile Include="CreateDefaultIni.cs" />
     <Compile Include="Forms\ConfigForm.cs">
@@ -81,27 +93,27 @@
     <Compile Include="Forms\ListForm.Designer.cs">
       <DependentUpon>ListForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="IOBoard.cs" />
+    <Compile Include="IoBoard.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TxData.cs" />
     <EmbeddedResource Include="Forms\ConfigForm.resx">
       <DependentUpon>ConfigForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Forms\IoBoardForm.resx">
+      <DependentUpon>IoBoardForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Forms\ListForm.resx">
       <DependentUpon>ListForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
     <None Include="packages.config" />
     <None Include="Properties\app.manifest" />
     <None Include="Properties\Settings.settings">
