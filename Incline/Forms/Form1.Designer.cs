@@ -13,9 +13,13 @@
         /// <param name="disposing">관리되는 리소스를 삭제해야 하면 true이고, 그렇지 않으면 false입니다.</param>
         protected override void Dispose(bool disposing)
         {
-            if (disposing && (components != null))
+            if (disposing)
             {
-                components.Dispose();
+                if (backgroundImage != null)
+                {
+                    backgroundImage.Dispose();
+                    backgroundImage = null;
+                }
             }
             base.Dispose(disposing);
         }
@@ -92,6 +96,7 @@
             this.panel_arcGauge.Size = new System.Drawing.Size(1139, 684);
             this.panel_arcGauge.TabIndex = 3;
             this.panel_arcGauge.Paint += new System.Windows.Forms.PaintEventHandler(this.panel_arcGauge_Paint);
+            this.panel_arcGauge.Resize += new System.EventHandler(this.panel_arcGauge_Resize);
             // 
             // lbl_title
             // 
@@ -129,7 +134,7 @@
             this.btn_liftUp.BackColor = System.Drawing.Color.SkyBlue;
             this.btn_liftUp.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btn_liftUp.Font = new System.Drawing.Font("굴림", 22.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.btn_liftUp.Location = new System.Drawing.Point(32, 904);
+            this.btn_liftUp.Location = new System.Drawing.Point(40, 903);
             this.btn_liftUp.Name = "btn_liftUp";
             this.btn_liftUp.Size = new System.Drawing.Size(240, 93);
             this.btn_liftUp.TabIndex = 8;
@@ -241,7 +246,7 @@
             this.btn_liftDown.BackColor = System.Drawing.Color.Red;
             this.btn_liftDown.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btn_liftDown.Font = new System.Drawing.Font("굴림", 22.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.btn_liftDown.Location = new System.Drawing.Point(288, 903);
+            this.btn_liftDown.Location = new System.Drawing.Point(296, 902);
             this.btn_liftDown.Name = "btn_liftDown";
             this.btn_liftDown.Size = new System.Drawing.Size(240, 93);
             this.btn_liftDown.TabIndex = 30;
@@ -267,7 +272,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(2382, 1325);
+            this.ClientSize = new System.Drawing.Size(1924, 1055);
             this.Controls.Add(this.btn_io);
             this.Controls.Add(this.btn_liftDown);
             this.Controls.Add(this.label1);

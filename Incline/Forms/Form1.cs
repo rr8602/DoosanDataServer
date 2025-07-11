@@ -7,11 +7,14 @@ using Incline.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.Design;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Globalization;
 using System.IO;
+using System.IO.Ports;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -35,16 +38,14 @@ namespace Incline
         public const int LAMP_RED = 6;  // 6번 출력: 빨간 램프
         public const int SPARE = 7;  // 7번 출력: 예비(미사용/기타)
 
-        private TcpServer tcpServer;
-        private string currentChassisNumber;
-        private string currentModel;
-        private string currentManufacturer;
+        SerialPort serialPort;
 
         private float currentValue = 0.0f;
         private IoBoard ioBoard;
+        private Sensor sensor;
         private System.Windows.Forms.Timer ioTimer;
+        private System.Windows.Forms.Timer sensorTimer;
         private byte currentOutputState = 0;
-        private int currentSequence = 1;
         private bool requestSent = false;
         private SettingDb db;
 
@@ -53,6 +54,8 @@ namespace Incline
         private int portNumber;
         private double maxInclineAngle;// 최대 경사각도
         private double minInclineAngle; // 최소 경사각도
+        private string ioPortName;
+        private string sensorPortName;
         private string iniFilePath = Path.Combine(Application.StartupPath, "Config", "Incline.ini");
 
         // TCP 연결 관련 변수
@@ -62,14 +65,15 @@ namespace Incline
         private Thread listenThread;
         private bool isListening = false;
 
+        private Bitmap backgroundImage;
+        private bool isBackgroundInitialized = false;
+
         public string acceptNo { get; private set; }
         public string vinNo { get; private set; }
         public string model { get; private set; }
         public DateTime meaDate { get; private set; }
         public double inclineAngle { get; private set; }
-
         public bool okNg { get; private set; }
-
         public bool inspectionStatus { get; private set; }
 
         public void MotorOn() => SetOutputPin(MOTOR, true);
@@ -97,11 +101,29 @@ namespace Incline
             this.AutoScaleMode = AutoScaleMode.None;
             this.Size = new Size(1920, 1080);
 
+            typeof(Panel).InvokeMember("DoubleBuffered",
+                System.Reflection.BindingFlags.SetProperty | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic,
+                null, panel_arcGauge, new object[] { true });
+
             db = new SettingDb(this);
 
             LoadConfigFromIni();
             db.SetupDatabaseConnection();
             InitializeIOBoard();
+            InitializeSensor();
+        }
+
+        private void InitializeArcGauge()
+        {
+            if (backgroundImage == null || backgroundImage.Width != panel_arcGauge.Width ||
+                backgroundImage.Height != panel_arcGauge.Height)
+            {
+                if (backgroundImage !=null)
+                    backgroundImage.Dispose();
+
+                backgroundImage = new Bitmap(panel_arcGauge.Width, panel_arcGauge.Height);
+                isBackgroundInitialized = false;
+            }
         }
 
         public void LoadConfigFromIni()
@@ -112,8 +134,10 @@ namespace Incline
 
                 ipAddress = iniFile.ReadString("Network", "IP");
                 portNumber = iniFile.ReadInteger("Network", "Port");
-                maxInclineAngle = iniFile.ReadDouble("Network", "MaxAngle", 90.0);
-                minInclineAngle = iniFile.ReadDouble("Network", "MinAngle", 0.0);
+                maxInclineAngle = iniFile.ReadDouble("Angle", "MaxAngle", 90.0);
+                minInclineAngle = iniFile.ReadDouble("Angle", "MinAngle", 0.0);
+                ioPortName = iniFile.ReadString("Network", "IoPort");
+                sensorPortName = iniFile.ReadString("Network", "SensorPort");
             }
             catch (Exception ex)
             {
@@ -127,11 +151,22 @@ namespace Incline
 
             ioBoard.OnInputDataReceived += IoBoard_OnInputDataReceived;
             ioBoard.onOutputDataSent += IoBoard_OnOutputDataSent;
-            ioBoard.OnRxDataReceived += IoBoard_OnRxDataReceived;
 
             ioTimer = new System.Windows.Forms.Timer();
             ioTimer.Interval = 200;
             ioTimer.Tick += IoTimer_Tick;
+        }
+
+        private void InitializeSensor()
+        {
+            sensor = new Sensor();
+
+            sensor.OnRxDataReceived += Sensor_OnRxDataReceived;
+            sensor.OnAngleChanged += Sensor_OnAngleChanged;
+
+            sensorTimer = new System.Windows.Forms.Timer();
+            sensorTimer.Interval = 100;
+            sensorTimer.Tick += sensorTimer_Tick;
         }
 
         private void IoTimer_Tick(object sender, EventArgs e)
@@ -143,11 +178,19 @@ namespace Incline
             }
         }
 
-        private void IoBoard_OnRxDataReceived(RxData rxData)
+        private void sensorTimer_Tick(object sender, EventArgs e)
+        {
+            if (sensor.IsConnected)
+            {
+                sensor.SendCommand();
+            }
+        }
+
+        private void Sensor_OnRxDataReceived(RxData rxData)
         {
             if (this.InvokeRequired)
             {
-                this.Invoke(new IoBoard.RxDataReceivedHandler(IoBoard_OnRxDataReceived), rxData);
+                this.Invoke(new Sensor.RxDataReceivedHandler(Sensor_OnRxDataReceived), rxData);
 
                 return;
             }
@@ -159,23 +202,10 @@ namespace Incline
                 lbl_incAngle.Text = currentValue.ToString("0.0");
                 inclineAngle = angle;
 
-                if (angle > maxInclineAngle)
-                {
-                    lbl_okNg.Text = "NG";
-                    lbl_okNg.BackColor = Color.Red;
-                    lbl_okNg.ForeColor = Color.White;
-                }
-                else
-                {
-                    lbl_okNg.Text = "OK";
-                    lbl_okNg.BackColor = Color.Green;
-                    lbl_okNg.ForeColor = Color.White;
-                }
+                ControlByInclineAngle(angle);
 
                 panel_arcGauge.Invalidate();
             }
-
-            ControlByInclineAngle(angle);
         }
 
         private void IoBoard_OnInputDataReceived(byte data)
@@ -251,6 +281,25 @@ namespace Incline
             return result;
         }
 
+        public bool ConnectSensor(string portName)
+        {
+            bool result = sensor.Connect(portName);
+            sensor.SendCommand();
+
+            if (result)
+            {
+                sensorTimer.Start();
+
+                lbl_message.Text = "센서 연결 성공";
+            }
+            else
+            {
+                MessageBox.Show("센서 연결에 실패했습니다.", "연결 오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
+            return result;
+        }
+
         public void DisconnectIOBoard()
         {
             ioTimer.Stop();
@@ -281,61 +330,49 @@ namespace Incline
 
         private void panel_arcGauge_Paint(object sender, PaintEventArgs e)
         {
-            Graphics g = e.Graphics;
-            g.SmoothingMode = SmoothingMode.AntiAlias;
+            // 배경 초기화 확인
+            if (!isBackgroundInitialized)
+            {
+                InitializeArcGauge();
+                DrawBackgroundOnce();
+            }
 
-            // 배경
+            // 배경 이미지 그리기
+            e.Graphics.DrawImage(backgroundImage, 0, 0);
+
+            // 포인터만 그리기
             int width = panel_arcGauge.Width;
             int height = panel_arcGauge.Height;
             int centerX = width - 350;
             int centerY = height - 60;
             int radius = width - 550;
 
-            // 기본 아크 배경 (아이보리)
-            g.FillPie(Brushes.Ivory, centerX - radius, centerY - radius, radius * 2, radius * 2, 90, 90);
-
-            // 외곽선
-            g.DrawArc(new Pen(Color.Black, 2), centerX - radius, centerY - radius, radius * 2, radius * 2, 90, 90);
-
-            // 색상 세그먼트 그리기
-            DrawColoredSegments(g, centerX, centerY, radius);
-
-            // 눈금 숫자
-            for (int angle = 0; angle <= 90; angle += 10)
-            {
-                double radians = (180 - angle) * Math.PI / 180;
-
-                float labelRadius = radius - 40; // 숫자를 표시할 반지름 (눈금보다 안쪽에 위치)
-                float x= centerX + (float)(Math.Cos(radians) * labelRadius);
-                float y = centerY - (float)(Math.Sin(radians) * labelRadius);
-
-                StringFormat format = new StringFormat();
-
-                if (angle == 0)
-                {
-                    format.Alignment = StringAlignment.Near;
-                    x -= 5;
-                }
-                else  if (angle == 90)
-                {
-                    format.Alignment = StringAlignment.Far;
-                    x += 5;
-                }
-                else
-                {
-                    format.Alignment = StringAlignment.Center;
-                }
-
-                g.DrawString(angle.ToString(), new Font("Arial", 25, FontStyle.Bold), Brushes.Black, x, y, format);
-            }
-
-            // 수평선 그리기 (파란색 영역)
-            float horizontalLineY = centerY;
-            g.FillRectangle(Brushes.Black, centerX - radius, horizontalLineY - 2, radius, 4);
-
-            // 현재 값에 해당하는 포인터
-            DrawPointer(g, centerX, centerY, radius, currentValue);
+            DrawPointer(e.Graphics, centerX, centerY, radius, currentValue);
         }
+
+        private void UpdatePointer()
+        {
+            // 포인터가 움직이는 영역만 갱신
+            int width = panel_arcGauge.Width;
+            int height = panel_arcGauge.Height;
+            int centerX = width - 350;
+            int centerY = height - 60;
+            int radius = width - 550;
+
+            using (Graphics g = panel_arcGauge.CreateGraphics())
+            {
+                Rectangle pointerArea = new Rectangle(
+                    centerX - radius,
+                    centerY - radius,
+                    radius * 2,
+                    radius * 2);
+
+                g.DrawImage(backgroundImage, pointerArea, pointerArea, GraphicsUnit.Pixel);
+
+                DrawPointer(g, centerX, centerY, radius, currentValue);
+            }
+        }
+
         private void DrawColoredSegments(Graphics g, int centerX, int centerY, int radius)
         {
             int innerRadius = radius - 40; // 안쪽 반지름
@@ -399,6 +436,92 @@ namespace Incline
             }
         }
 
+        private void Sensor_OnAngleChanged(double gatAngle)
+        {
+            if (this.InvokeRequired)
+            {
+
+                this.Invoke(new Sensor.AngleChangedHandler(Sensor_OnAngleChanged), gatAngle);
+                return;
+            }
+
+            Debug.WriteLine($"각도 변경 감지: {gatAngle}°");
+
+            // UI 업데이트
+            currentValue = (float)gatAngle;
+            lbl_arcGaugeValue.Text = currentValue.ToString("0.0");
+            lbl_incAngle.Text = currentValue.ToString("0.0");
+            inclineAngle = gatAngle;
+
+            // OK/NG 판정
+            ControlByInclineAngle(gatAngle);
+
+            // 포인터만 갱신
+            UpdatePointer();
+        }
+
+        private void DrawBackgroundOnce()
+        {
+            if (isBackgroundInitialized)
+                return;
+
+            using (Graphics g = Graphics.FromImage(backgroundImage))
+            {
+                g.SmoothingMode = SmoothingMode.AntiAlias;
+                g.Clear(panel_arcGauge.BackColor);
+
+                // 배경 설정
+                int width = panel_arcGauge.Width;
+                int height = panel_arcGauge.Height;
+                int centerX = width - 350;
+                int centerY = height - 60;
+                int radius = width - 550;
+
+                // 기본 아크 배경
+                g.FillPie(Brushes.Ivory, centerX - radius, centerY - radius, radius * 2, radius * 2, 90, 90);
+
+                // 외곽선
+                g.DrawArc(new Pen(Color.Black, 2), centerX - radius, centerY - radius, radius * 2, radius * 2, 90, 90);
+
+                // 색상 세그먼트 그리기
+                DrawColoredSegments(g, centerX, centerY, radius);
+
+                // 눈금 숫자
+                for (int angle = 0; angle <= 90; angle += 10)
+                {
+                    double radians = (180 - angle) * Math.PI / 180;
+                    float labelRadius = radius - 40;
+                    float x = centerX + (float)(Math.Cos(radians) * labelRadius);
+                    float y = centerY - (float)(Math.Sin(radians) * labelRadius);
+
+                    StringFormat format = new StringFormat();
+                    if (angle == 0)
+                    {
+                        format.Alignment = StringAlignment.Near;
+                        x -= 5;
+                    }
+                    else if (angle == 90)
+                    {
+                        format.Alignment = StringAlignment.Far;
+                        x += 5;
+                    }
+                    else
+                    {
+                        format.Alignment = StringAlignment.Center;
+                    }
+
+                    g.DrawString(angle.ToString(), new Font("Arial", 25, FontStyle.Bold), Brushes.Black, x, y, format);
+                }
+
+                // 수평선 그리기
+                float horizontalLineY = centerY;
+                g.FillRectangle(Brushes.Black, centerX - radius, horizontalLineY - 2, radius, 4);
+            }
+
+            isBackgroundInitialized = true;
+        }
+
+
         private void DrawPointer(Graphics g, int centerX, int centerY, int radius, float value)
         {
             double radians = (180 - currentValue) * Math.PI / 180;
@@ -410,47 +533,20 @@ namespace Incline
             g.FillEllipse(Brushes.Black, centerX - 5, centerY - 5, 10, 10);
         }
 
-        // 센서가 없을 때, 사용하는 경사각도 값 계산 메서드
-        private double GetCurrentInclination()
-        {
-            Random rand = new Random();
-            double angle = Math.Round(rand.NextDouble() * 90, 2);
-
-            this.inclineAngle = angle;
-            this.lbl_incAngle.Text = angle.ToString("0.00") + "°";
-            this.currentValue = (float)angle;
-            this.lbl_arcGaugeValue.Text = currentValue.ToString("0.0");
-            this.inspectionStatus = true;
-
-            panel_arcGauge.Invalidate();
-
-            return angle;
-        }
-
         // 경사각도에 따른 동작 제어 (센서가 있을 시, IoTimer_Tick에 구현)
         public void ControlByInclineAngle(double angle)
         {
             if (angle >= maxInclineAngle)
             {
-                MotorOff();
-                BuzzerOn();
-                LampRedOn();
-                LampGreenOff();
                 lbl_message.Text = "경고: 각도 초과!";
 
-                lbl_okNg.Text = "NG";
                 lbl_okNg.BackColor = Color.Red;
                 lbl_okNg.ForeColor = Color.White;
             }
             else
             {
-                MotorOn();
-                BuzzerOff();
-                LampRedOff();
-                LampGreenOn();
                 lbl_message.Text = "정상 동작";
 
-                lbl_okNg.Text = "OK";
                 lbl_okNg.BackColor = Color.Green;
                 lbl_okNg.ForeColor = Color.White;
             }
@@ -553,7 +649,7 @@ namespace Incline
                     {
                         Console.WriteLine($"수신된 데이터: {data}");
 
-                        if (data.Contains("<WHO/1>"))
+                        if (data.Contains("WHO"))
                         {
                             SendResponse("<CON/ANG/OK/3>");
                         }
@@ -646,15 +742,14 @@ namespace Incline
             }
         }
 
-        private bool ValidateBarcode(string barcode)
+        private bool ValidateVinNo(string vinNo)
         {
-            // 바코드 유효성 검사
-            if (string.IsNullOrEmpty(barcode) || barcode.Length < 5)
+            // 차대번호 유효성 검사
+            if (string.IsNullOrEmpty(vinNo) || vinNo.Length < 6)
             {
                 return false;
             }
 
-            // *** 추가적인 바코드 형식 검사 로직 필요 (DB에 있는 유효한 바코드인지 등)
             return true;
         }
 
@@ -710,14 +805,21 @@ namespace Incline
 
             currentValue = 0.0f;
 
+            InitializeArcGauge();
             panel_arcGauge.Invalidate();
-
-            SetupTcpConnection();
         }
 
         private void btn_liftUp_MouseDown(object sender, MouseEventArgs e)
         {
-            LiftUpOnSignal(true);
+            if (ioBoard != null && ioBoard.IsConnected)
+            {
+                LiftUpOnSignal(true);
+            }
+            else
+            {
+                MessageBox.Show("IO 보드가 연결되어 있지 않습니다.\n설정 메뉴에서 IO 보드를 먼저 연결해주세요.",
+                               "연결 오류", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
         }
 
         private void btn_liftUp_MouseUp(object sender, MouseEventArgs e)
@@ -727,7 +829,15 @@ namespace Incline
 
         private void btn_liftDown_MouseDown(object sender, MouseEventArgs e)
         {
-            LiftDownOnSignal(true);
+            if (ioBoard != null && ioBoard.IsConnected)
+            {
+                LiftUpOnSignal(true);
+            }
+            else
+            {
+                MessageBox.Show("IO 보드가 연결되어 있지 않습니다.\n설정 메뉴에서 IO 보드를 먼저 연결해주세요.",
+                               "연결 오류", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
         }
 
         private void btn_liftDown_MouseUp(object sender, MouseEventArgs e)
@@ -735,7 +845,6 @@ namespace Incline
             LiftOffSignal();
         }
 
-        // 기존 FormClosing 이벤트 핸들러를 수정
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             this.FormClosing -= Form1_FormClosing;
@@ -746,11 +855,10 @@ namespace Incline
                 {
                     ioTimer?.Stop();
                     ioBoard?.Disconnect();
-                    tcpServer.Stop();
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine($"폼 종료 중 오류: {ex.Message}");
+                    Debug.WriteLine($"폼 종료 중 오류: {ex.Message}");
                 }
             }
 
@@ -760,7 +868,7 @@ namespace Incline
 
                 if (listenThread != null && listenThread.IsAlive)
                 {
-                    listenThread.Join(1000); // 최대 1초 대기
+                    listenThread.Join(1000);
                 }
 
                 if (clientStream != null)
@@ -775,7 +883,7 @@ namespace Incline
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"TCP 연결 종료 중 오류: {ex.Message}");
+                Debug.WriteLine($"TCP 연결 종료 중 오류: {ex.Message}");
             }
 
             ioTimer?.Dispose();
@@ -807,7 +915,7 @@ namespace Incline
                 }
             }
         }
-
+        //"#READ"
         private void btn_inspectionStart_Click(object sender, EventArgs e)
         {
             double angle;
@@ -823,19 +931,11 @@ namespace Incline
             {
                 if (!string.IsNullOrEmpty(vinNo))
                 {
-                    if (ValidateBarcode(vinNo))
+                    if (ValidateVinNo(vinNo))
                     {
                         lbl_currentVehicle.Text = vinNo;
+                        inspectionStatus = true; // 검사 끝날때로 옮겨야 함
 
-                        //ioBoard.SendCommand();
-                        lbl_message.Text = "센서 데이터 요청 중...";
-
-                        inspectionStatus = true;
-
-                        // 센서 연결 시, 실제 검사 결과 처리는 IoBoard_OnRxDataReceived 에서 처리됨
-
-                        angle = GetCurrentInclination();
-                        ControlByInclineAngle(angle);
                         SendInclineDataToServer();
                         meaDate = DateTime.Now;
                     }
@@ -851,84 +951,6 @@ namespace Incline
             }
         }
 
-        /*private void TcpServer_VehicleInfoReceived(object sender, VehicleInfoEventArgs e)
-        {
-            if (InvokeRequired)
-            {
-                Invoke((MethodInvoker)delegate { TcpServer_VehicleInfoReceived(sender, e); });
-                return;
-            }
-
-            try
-            {
-                currentChassisNumber = e.ChassisNumber;
-                currentModel = e.Model;
-                currentManufacturer = e.Manufacturer;
-
-                btn_inspectionStart.Enabled = !string.IsNullOrEmpty(currentChassisNumber);
-
-                lbl_currentVehicle.Text = currentChassisNumber;
-
-                UpdateStatusMessage("차량 정보 수신", $"차량 정보: {currentChassisNumber}, {currentModel}, {currentManufacturer}");
-
-                MessageBox.Show($"차량 정보가 수신되었습니다.\n차대번호: {currentChassisNumber}\n모델: {currentModel}\n제조사: {currentManufacturer}",
-                              "차량 정보 수신", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"차량 정보 수신 중 오류가 발생했습니다: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        private void TcpServer_PacketReceived(object sender, PacketReceivedEventArgs e)
-        {
-            if (InvokeRequired)
-            {
-                Invoke((MethodInvoker)delegate { TcpServer_PacketReceived(sender, e); });
-                return;
-            }
-
-            try
-            {
-                Console.WriteLine($"패킷 수신됨: 명령어={e.Command}, 소스={e.Source}, 데이터={e.Data}, 데이터 카운트={e.DataCount}");
-
-                switch (e.Command)
-                {
-                    case Packet.CMD_WHO:
-                        UpdateStatusMessage("", "설비 인증 요청");
-                        break;
-
-                    case Packet.CMD_REG:
-                        UpdateStatusMessage("", "차량 정보 등록");
-                        break;
-
-                    default:
-                        UpdateStatusMessage("", "알 수 없는 명령");
-                        break;
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"패킷 처리 중 오류 발생: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }*/
-
-        private void TcpServer_ServerLog(object sender, string e)
-        {
-            Console.WriteLine(e);
-        }
-
-        /*private void UpdateStatusMessage(string title, string message)
-        {
-            if (lbl_title != null && lbl_message != null)
-            {
-                lbl_title.Text = title;
-                lbl_message.Text = message;
-            }
-
-            Console.WriteLine($"[{DateTime.Now}] State : {title} - {message}");
-        }*/
-
         private bool confirmOkNg()
         {
             double angle;
@@ -936,7 +958,12 @@ namespace Incline
 
             if (double.TryParse(text, out angle))
             {
-                return angle <= maxInclineAngle;
+                if (angle <= maxInclineAngle)
+                {
+                    lbl_message.Text = "검사 합격";
+
+                    return true;
+                }
             }
 
             return false;
@@ -966,9 +993,22 @@ namespace Incline
 
         private void btn_io_Click(object sender, EventArgs e)
         {
-            IoBoardForm ioBoardForm = new IoBoardForm();
+            if (ioBoard != null && ioBoard.IsConnected)
+            {
+                IoBoardForm ioBoardForm = new IoBoardForm(this);
+                ioBoardForm.Show();
+            }
+            else
+            {
+                MessageBox.Show("IO 보드가 연결되어 있지 않습니다.\n설정 메뉴에서 IO 보드를 먼저 연결해주세요.",
+                       "연결 오류", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
 
-            ioBoardForm.Show();
+        private void panel_arcGauge_Resize(object sender, EventArgs e)
+        {
+            isBackgroundInitialized = false;
+            panel_arcGauge.Invalidate();
         }
     }
 }

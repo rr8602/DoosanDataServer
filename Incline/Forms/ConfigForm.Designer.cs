@@ -35,13 +35,18 @@
             this.lbl_ip = new System.Windows.Forms.Label();
             this.btn_close = new System.Windows.Forms.Button();
             this.btn_apply = new System.Windows.Forms.Button();
-            this.btn_connect = new System.Windows.Forms.Button();
-            this.btn_refreshPorts = new System.Windows.Forms.Button();
-            this.cmb_ports = new System.Windows.Forms.ComboBox();
+            this.btn_ioConnect = new System.Windows.Forms.Button();
+            this.btn_ioRefreshPorts = new System.Windows.Forms.Button();
+            this.cmb_ioPorts = new System.Windows.Forms.ComboBox();
             this.txt_maxInclineAngle = new System.Windows.Forms.TextBox();
             this.txt_minInclineAngle = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
+            this.btn_sensorConnect = new System.Windows.Forms.Button();
+            this.btn_sensorRefreshPorts = new System.Windows.Forms.Button();
+            this.cmb_sensorPorts = new System.Windows.Forms.ComboBox();
             this.SuspendLayout();
             // 
             // txt_serverPort
@@ -87,7 +92,7 @@
             this.btn_close.BackColor = System.Drawing.Color.Silver;
             this.btn_close.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btn_close.Font = new System.Drawing.Font("굴림", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.btn_close.Location = new System.Drawing.Point(437, 428);
+            this.btn_close.Location = new System.Drawing.Point(431, 499);
             this.btn_close.Name = "btn_close";
             this.btn_close.Size = new System.Drawing.Size(140, 54);
             this.btn_close.TabIndex = 28;
@@ -100,7 +105,7 @@
             this.btn_apply.BackColor = System.Drawing.Color.Silver;
             this.btn_apply.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btn_apply.Font = new System.Drawing.Font("굴림", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.btn_apply.Location = new System.Drawing.Point(287, 428);
+            this.btn_apply.Location = new System.Drawing.Point(281, 499);
             this.btn_apply.Name = "btn_apply";
             this.btn_apply.Size = new System.Drawing.Size(144, 54);
             this.btn_apply.TabIndex = 27;
@@ -108,35 +113,35 @@
             this.btn_apply.UseVisualStyleBackColor = false;
             this.btn_apply.Click += new System.EventHandler(this.btn_apply_Click);
             // 
-            // btn_connect
+            // btn_ioConnect
             // 
-            this.btn_connect.Font = new System.Drawing.Font("굴림", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.btn_connect.Location = new System.Drawing.Point(233, 368);
-            this.btn_connect.Name = "btn_connect";
-            this.btn_connect.Size = new System.Drawing.Size(168, 34);
-            this.btn_connect.TabIndex = 31;
-            this.btn_connect.Text = "연결";
-            this.btn_connect.UseVisualStyleBackColor = true;
-            this.btn_connect.Click += new System.EventHandler(this.btn_connect_Click);
+            this.btn_ioConnect.Font = new System.Drawing.Font("굴림", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.btn_ioConnect.Location = new System.Drawing.Point(403, 317);
+            this.btn_ioConnect.Name = "btn_ioConnect";
+            this.btn_ioConnect.Size = new System.Drawing.Size(168, 23);
+            this.btn_ioConnect.TabIndex = 31;
+            this.btn_ioConnect.Text = "Connect";
+            this.btn_ioConnect.UseVisualStyleBackColor = true;
+            this.btn_ioConnect.Click += new System.EventHandler(this.btn_ioConnect_Click);
             // 
-            // btn_refreshPorts
+            // btn_ioRefreshPorts
             // 
-            this.btn_refreshPorts.Font = new System.Drawing.Font("굴림", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.btn_refreshPorts.Location = new System.Drawing.Point(416, 368);
-            this.btn_refreshPorts.Name = "btn_refreshPorts";
-            this.btn_refreshPorts.Size = new System.Drawing.Size(159, 34);
-            this.btn_refreshPorts.TabIndex = 30;
-            this.btn_refreshPorts.Text = "Refresh";
-            this.btn_refreshPorts.UseVisualStyleBackColor = true;
-            this.btn_refreshPorts.Click += new System.EventHandler(this.btn_refreshPorts_Click);
+            this.btn_ioRefreshPorts.Font = new System.Drawing.Font("굴림", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.btn_ioRefreshPorts.Location = new System.Drawing.Point(403, 346);
+            this.btn_ioRefreshPorts.Name = "btn_ioRefreshPorts";
+            this.btn_ioRefreshPorts.Size = new System.Drawing.Size(168, 23);
+            this.btn_ioRefreshPorts.TabIndex = 30;
+            this.btn_ioRefreshPorts.Text = "Refresh";
+            this.btn_ioRefreshPorts.UseVisualStyleBackColor = true;
+            this.btn_ioRefreshPorts.Click += new System.EventHandler(this.btn_refreshPorts_Click);
             // 
-            // cmb_ports
+            // cmb_ioPorts
             // 
-            this.cmb_ports.FormattingEnabled = true;
-            this.cmb_ports.Location = new System.Drawing.Point(92, 375);
-            this.cmb_ports.Name = "cmb_ports";
-            this.cmb_ports.Size = new System.Drawing.Size(125, 23);
-            this.cmb_ports.TabIndex = 29;
+            this.cmb_ioPorts.FormattingEnabled = true;
+            this.cmb_ioPorts.Location = new System.Drawing.Point(236, 317);
+            this.cmb_ioPorts.Name = "cmb_ioPorts";
+            this.cmb_ioPorts.Size = new System.Drawing.Size(161, 23);
+            this.cmb_ioPorts.TabIndex = 29;
             // 
             // txt_maxInclineAngle
             // 
@@ -176,18 +181,73 @@
             this.label2.Text = "최대경사각도";
             this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
+            // label3
+            // 
+            this.label3.Font = new System.Drawing.Font("굴림", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.label3.Location = new System.Drawing.Point(25, 300);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(167, 50);
+            this.label3.TabIndex = 39;
+            this.label3.Text = "IoBoard";
+            this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // label4
+            // 
+            this.label4.Font = new System.Drawing.Font("굴림", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.label4.Location = new System.Drawing.Point(25, 380);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(167, 50);
+            this.label4.TabIndex = 43;
+            this.label4.Text = "Sensor";
+            this.label4.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // btn_sensorConnect
+            // 
+            this.btn_sensorConnect.Font = new System.Drawing.Font("굴림", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.btn_sensorConnect.Location = new System.Drawing.Point(403, 397);
+            this.btn_sensorConnect.Name = "btn_sensorConnect";
+            this.btn_sensorConnect.Size = new System.Drawing.Size(168, 23);
+            this.btn_sensorConnect.TabIndex = 42;
+            this.btn_sensorConnect.Text = "Connect";
+            this.btn_sensorConnect.UseVisualStyleBackColor = true;
+            this.btn_sensorConnect.Click += new System.EventHandler(this.btn_sensorConnect_Click);
+            // 
+            // btn_sensorRefreshPorts
+            // 
+            this.btn_sensorRefreshPorts.Font = new System.Drawing.Font("굴림", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.btn_sensorRefreshPorts.Location = new System.Drawing.Point(403, 426);
+            this.btn_sensorRefreshPorts.Name = "btn_sensorRefreshPorts";
+            this.btn_sensorRefreshPorts.Size = new System.Drawing.Size(168, 23);
+            this.btn_sensorRefreshPorts.TabIndex = 41;
+            this.btn_sensorRefreshPorts.Text = "Refresh";
+            this.btn_sensorRefreshPorts.UseVisualStyleBackColor = true;
+            this.btn_sensorRefreshPorts.Click += new System.EventHandler(this.btn_sensorRefreshPorts_Click);
+            // 
+            // cmb_sensorPorts
+            // 
+            this.cmb_sensorPorts.FormattingEnabled = true;
+            this.cmb_sensorPorts.Location = new System.Drawing.Point(236, 397);
+            this.cmb_sensorPorts.Name = "cmb_sensorPorts";
+            this.cmb_sensorPorts.Size = new System.Drawing.Size(161, 23);
+            this.cmb_sensorPorts.TabIndex = 40;
+            // 
             // ConfigForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(590, 494);
+            this.ClientSize = new System.Drawing.Size(583, 565);
+            this.Controls.Add(this.label4);
+            this.Controls.Add(this.btn_sensorConnect);
+            this.Controls.Add(this.btn_sensorRefreshPorts);
+            this.Controls.Add(this.cmb_sensorPorts);
+            this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.txt_minInclineAngle);
             this.Controls.Add(this.txt_maxInclineAngle);
-            this.Controls.Add(this.btn_connect);
-            this.Controls.Add(this.btn_refreshPorts);
-            this.Controls.Add(this.cmb_ports);
+            this.Controls.Add(this.btn_ioConnect);
+            this.Controls.Add(this.btn_ioRefreshPorts);
+            this.Controls.Add(this.cmb_ioPorts);
             this.Controls.Add(this.btn_close);
             this.Controls.Add(this.btn_apply);
             this.Controls.Add(this.txt_serverPort);
@@ -215,12 +275,17 @@
         private System.Windows.Forms.Label lbl_ip;
         private System.Windows.Forms.Button btn_close;
         private System.Windows.Forms.Button btn_apply;
-        private System.Windows.Forms.Button btn_connect;
-        private System.Windows.Forms.Button btn_refreshPorts;
-        private System.Windows.Forms.ComboBox cmb_ports;
+        private System.Windows.Forms.Button btn_ioConnect;
+        private System.Windows.Forms.Button btn_ioRefreshPorts;
+        private System.Windows.Forms.ComboBox cmb_ioPorts;
         private System.Windows.Forms.TextBox txt_maxInclineAngle;
         private System.Windows.Forms.TextBox txt_minInclineAngle;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Button btn_sensorConnect;
+        private System.Windows.Forms.Button btn_sensorRefreshPorts;
+        private System.Windows.Forms.ComboBox cmb_sensorPorts;
     }
 }

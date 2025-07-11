@@ -9,15 +9,20 @@ namespace Incline
 {
     public class CreateDefaultIni
     {
-        public static void CreateInclineIniFile(string ip, string port, string filePath = "Config\\Incline.ini")
+        public static void CreateInclineIniFile(string serverIp, string serverPort, string maxAngle, string minAngle, string ioPort, string sensorPort,
+            string filePath = "Config\\Incline.ini")
         {
             try
             {
                 IniFile iniFile = new IniFile(filePath);
 
                 // 네트워크 설정
-                iniFile.WriteValue("Network", "IP", ip);
-                iniFile.WriteValue("Network", "Port", port);
+                iniFile.WriteValue("Network", "IP", serverIp);
+                iniFile.WriteValue("Network", "Port", serverPort);
+                iniFile.WriteValue("Angle", "MaxAngle", maxAngle);
+                iniFile.WriteValue("Angle", "MinAngle", minAngle);
+                iniFile.WriteValue("Network", "IoPort", ioPort);
+                iniFile.WriteValue("Network", "SensorPort", sensorPort);
 
                 Console.WriteLine($"INI 파일이 성공적으로 생성되었습니다: {filePath}");
             }

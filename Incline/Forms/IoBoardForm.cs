@@ -13,22 +13,24 @@ namespace Incline.Forms
 {
     public partial class IoBoardForm : Form
     {
-        private Form1 form = new Form1();
+        private Form1 form;
         private bool isOnOff = true;
 
         private const string LampNonePath = "..\\..\\Lamp-None.bmp";
         private const string ButtonNonePath = "..\\..\\Resources\\Button-None.png";
         private const string ButtonGreenPath = "..\\..\\Resources\\Button-Green1.png";
 
+        private static Image NoneLampImg = Image.FromFile(LampNonePath);
         private static Image GreenButtonImg = Image.FromFile(ButtonGreenPath);
         private static Image NoneButtonImg = Image.FromFile(ButtonNonePath);
 
         private static Image ProcessedGreenImg = ChangeMagentaToLightYellow(GreenButtonImg);
         private static Image ProcessedNoneImg = ChangeMagentaToLightYellow(NoneButtonImg);
 
-        public IoBoardForm()
+        public IoBoardForm(Form1 parentForm)
         {
             InitializeComponent();
+            this.form = parentForm;
         }
 
         private static Image ChangeMagentaToLightYellow(Image srcImg)
@@ -50,21 +52,15 @@ namespace Incline.Forms
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            string lampNonePath = "..\\..\\Lamp-None.bmp";
-            string buttonNonePath = "..\\..\\Resources\\Button-None.png";
-
             try
             {
-                Image srcLamp = Image.FromFile(lampNonePath);
-                Image srcButton = Image.FromFile(buttonNonePath);
-
                 for (int i = 0; i <= 7; i++)
                 {
                     PictureBox pictureLampBox = (PictureBox)panel1.Controls.Find($"pic_input{i}", true)[0];
-                    pictureLampBox.Image = ChangeMagentaToLightYellow(srcLamp);
+                    pictureLampBox.Image = ChangeMagentaToLightYellow(NoneLampImg);
 
                     PictureBox pictureButtonBox = (PictureBox)panel2.Controls.Find($"pic_output{i}", true)[0];
-                    pictureButtonBox.Image = ChangeMagentaToLightYellow(srcButton);
+                    pictureButtonBox.Image = ChangeMagentaToLightYellow(NoneButtonImg);
                 }
             }
             catch (FileNotFoundException ex)
@@ -120,7 +116,7 @@ namespace Incline.Forms
                     pic_output2.Image = ProcessedGreenImg;
                     pic_output3.Image = ProcessedGreenImg;
 
-                    form.LiftUpOnSignal(true);
+                    form.LiftDownOnSignal(true);
                     isOnOff = false;
                 }
                 else

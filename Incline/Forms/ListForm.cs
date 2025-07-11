@@ -9,14 +9,22 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Tab;
-
 namespace Incline.Forms
 {
     public partial class ListForm : Form
     {
         public string SelectedVinNo { get; private set; }
         private SettingDb db;
+
+        private string acceptNo;
+        private string vinNo;
+        private string model;
+        private double IncAngle;
+        private bool inspectionStatus;
+        private bool okNg;
+        private DateTime measurementDate;
+
+        private bool isFirstLoad = true;
 
         public ListForm(Form1 parent, SettingDb db)
         {
@@ -81,33 +89,50 @@ namespace Incline.Forms
         {
             if (reader.HasRows)
             {
+                bool hasAnyData = false;
+                string todayDate = DateTime.Today.ToString("yyyyMMdd");
+
                 while (reader.Read())
                 {
-                    string acceptNo = reader["Accept_No"].ToString();
-                    string vinNo = reader["Vin_No"].ToString();
-                    string model = reader["Model"].ToString();
-                    double IncAngle = Convert.ToDouble(reader["Inc_Angle"]);
-                    bool inspectionStatus = Convert.ToBoolean(reader["Inspection_Status"]);
-                    bool okNg = Convert.ToBoolean(reader["Ok_Ng"]);
-                    DateTime measurementDate = Convert.ToDateTime(reader["Mea_Date"]);
+                    acceptNo = reader["Accept_No"].ToString();
+                    vinNo = reader["Vin_No"].ToString();
+                    model = reader["Model"].ToString();
+                    IncAngle = Convert.ToDouble(reader["Inc_Angle"]);
+                    inspectionStatus = Convert.ToBoolean(reader["Inspection_Status"]);
+                    okNg = Convert.ToBoolean(reader["Ok_Ng"]);
+                    measurementDate = Convert.ToDateTime(reader["Mea_Date"]);
 
-                    string todayDate = DateTime.Today.ToString("yyyyMMdd");
-
-                    if (acceptNo.StartsWith(todayDate))
+                    if (isFirstLoad)
                     {
-                        dataGridView1.Rows.Add
-                        (
-                            acceptNo,
-                            vinNo,
-                            model,
-                            IncAngle.ToString("F1"),
-                            inspectionStatus ? "검사완료" : "검사대기",
-                            okNg ? "양호" : "불량",
-                            measurementDate.ToString("yyyy-MM-dd HH:mm:ss")
-                        );
+                        if (acceptNo.Length >= 8 && acceptNo.Substring(0, 8) == todayDate)
+                        {
+                            AddRowToGrid(acceptNo, vinNo, model, IncAngle, inspectionStatus, okNg, measurementDate);
+                            hasAnyData = true;
+                        }
+                    }
+                    else
+                    {
+                        AddRowToGrid(acceptNo, vinNo, model, IncAngle, inspectionStatus, okNg, measurementDate);
                     }
                 }
+
+                if (isFirstLoad)
+                    isFirstLoad = false;
             }
+        }
+
+        private void AddRowToGrid(string acceptNo, string vinNo, string model, double incAngle,
+                          bool inspectionStatus, bool okNg, DateTime measurementDate)
+        {
+            dataGridView1.Rows.Add(
+                acceptNo,
+                vinNo,
+                model,
+                incAngle.ToString("F1"),
+                inspectionStatus ? "검사완료" : "검사대기",
+                okNg ? "양호" : "불량",
+                measurementDate.ToString("yyyy-MM-dd HH:mm:ss")
+            );
         }
 
         private void SearchData(string vinNo = "", DateTime? startDate = null, DateTime? endDate = null)
@@ -133,13 +158,15 @@ namespace Incline.Forms
                     }
 
                     // 날짜 검색 조건 추가
-                    if (startDate.HasValue && endDate.HasValue)
+                    if (date_start.Checked || date_end.Checked)
                     {
-                        query += " AND Mea_Date BETWEEN ? AND ?";
-                        parameters.Add(new OleDbParameter("@StartDate", OleDbType.Date) { Value = startDate.Value });
+                        query += " AND Left(Accept_No, 8) BETWEEN ? AND ?";
 
-                        DateTime endDateWithTime = endDate.Value.Date.AddDays(1).AddSeconds(-1);
-                        parameters.Add(new OleDbParameter("@EndDate", OleDbType.Date) { Value = endDateWithTime });
+                        string startDateStr = startDate.Value.ToString("yyyyMMdd");
+                        string endDateStr = endDate.Value.ToString("yyyyMMdd");
+
+                        parameters.Add(new OleDbParameter("@StartDate", OleDbType.VarChar) { Value = startDateStr });
+                        parameters.Add(new OleDbParameter("@EndDate", OleDbType.VarChar) { Value = endDateStr });
                     }
 
                     // 결과 정렬
@@ -243,7 +270,7 @@ namespace Incline.Forms
 
         private void dataGridView1_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
-            if (e.ColumnIndex == 4 && e.RowIndex >= 0 && e.Value != null)
+            if (e.ColumnIndex == 5 && e.RowIndex >= 0 && e.Value != null)
             {
                 string value = e.Value.ToString();
 
@@ -258,7 +285,7 @@ namespace Incline.Forms
                     e.CellStyle.Font = new Font(dataGridView1.Font, FontStyle.Bold);
                 }
             }
-            else if (e.ColumnIndex == 3 && e.RowIndex >= 0 && e.Value != null)
+            else if (e.ColumnIndex == 4 && e.RowIndex >= 0 && e.Value != null)
             {
                 string value = e.Value.ToString();
 

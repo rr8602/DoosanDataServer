@@ -73,6 +73,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="RxData.cs" />
+    <Compile Include="Sensor.cs" />
     <Compile Include="SettingDb.cs" />
     <Compile Include="CreateDefaultIni.cs" />
     <Compile Include="Forms\ConfigForm.cs">
