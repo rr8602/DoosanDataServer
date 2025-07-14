@@ -65,16 +65,21 @@ namespace Incline
         private Thread listenThread;
         private bool isListening = false;
 
+        // 통신 활동 상태를 위한 변수
+        private DateTime lastIoBoardRxTime = DateTime.MinValue;
+        private DateTime lastSensorRxTime = DateTime.MinValue;
+        private System.Windows.Forms.Timer commActivityTimer;
+
         private Bitmap backgroundImage;
         private bool isBackgroundInitialized = false;
 
-        public string acceptNo { get; private set; }
-        public string vinNo { get; private set; }
-        public string model { get; private set; }
-        public DateTime meaDate { get; private set; }
-        public double inclineAngle { get; private set; }
-        public bool okNg { get; private set; }
-        public bool inspectionStatus { get; private set; }
+        public string acceptNo { get; set; }
+        public string vinNo { get; set; }
+        public string model { get; set; }
+        public DateTime meaDate { get; set; }
+        public double inclineAngle { get; set; }
+        public bool okNg { get; set; }
+        public bool inspectionStatus { get; set; }
 
         public void MotorOn() => SetOutputPin(MOTOR, true);
         public void MotorOff() => SetOutputPin(MOTOR, false);
@@ -104,6 +109,11 @@ namespace Incline
             typeof(Panel).InvokeMember("DoubleBuffered",
                 System.Reflection.BindingFlags.SetProperty | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic,
                 null, panel_arcGauge, new object[] { true });
+
+            commActivityTimer = new System.Windows.Forms.Timer();
+            commActivityTimer.Interval = 1000;
+            commActivityTimer.Tick += CommActivityTimer_Tick;
+            commActivityTimer.Start();
 
             db = new SettingDb(this);
 
@@ -169,6 +179,33 @@ namespace Incline
             sensorTimer.Tick += sensorTimer_Tick;
         }
 
+        private void CommActivityTimer_Tick(object sender, EventArgs e)
+        {
+            DateTime now = DateTime.Now;
+
+            TimeSpan ioBoardElapsed = now - lastIoBoardRxTime;
+            
+            if (ioBoardElapsed.TotalSeconds > 3)
+            {
+                lbl_ioBoardComm.ForeColor = Color.Red;
+            }
+            else
+            {
+                lbl_ioBoardComm.ForeColor = Color.Green;
+            }
+
+            TimeSpan sensorElapsed = now - lastSensorRxTime;
+
+            if (sensorElapsed.TotalSeconds > 3)
+            {
+                lbl_sensorComm.ForeColor = Color.Red;
+            }
+            else
+            {
+                lbl_sensorComm.ForeColor = Color.Green;
+            }
+        }
+
         private void IoTimer_Tick(object sender, EventArgs e)
         {
             if (ioBoard.IsConnected && !requestSent)
@@ -195,6 +232,8 @@ namespace Incline
                 return;
             }
 
+            lastSensorRxTime = DateTime.Now;
+
             if (float.TryParse(rxData.DataAsString, out float angle))
             {
                 currentValue = angle;
@@ -217,23 +256,14 @@ namespace Incline
                 return;
             }
 
+            lastIoBoardRxTime = DateTime.Now;
+            requestSent = false;
+
             bool[] inputs = new bool[8];
 
             for (int i = 0; i < 8; i++)
             {
                 inputs[i] = (data & (1 << i)) != 0;
-            }
-
-            UpdateUIBasedOnInputs(inputs);
-
-            int inputValue = data & 0x7F; // 하위 7비트만 사용
-
-            if (Math.Abs(currentValue - ((inputValue / 127.0f) * 90.0f)) > 0.1f)
-            {
-                currentValue = (inputValue / 127.0f) * 90.0f; // 0-127 값을 0-90도로 변환
-                lbl_arcGaugeValue.Text = currentValue.ToString("0.0");
-                lbl_incAngle.Text = currentValue.ToString("0.0");
-                panel_arcGauge.Invalidate();
             }
         }
 
@@ -245,21 +275,6 @@ namespace Incline
 
                 return;
             }
-
-            if (success)
-                lbl_message.Text = "출력 성공";
-            else
-                lbl_message.Text = "출력 실패";
-        }
-
-        private void UpdateUIBasedOnInputs(bool[] inputs)
-        {
-            if (inputs[0])
-            {
-                lbl_message.Text = "입력 0 활성화";
-            }
-
-            // *** 다음 입력에 대한 처리 추가 필요
         }
 
         public bool ConnectIOBoard(string portName)
@@ -536,18 +551,25 @@ namespace Incline
         // 경사각도에 따른 동작 제어 (센서가 있을 시, IoTimer_Tick에 구현)
         public void ControlByInclineAngle(double angle)
         {
-            if (angle >= maxInclineAngle)
-            {
-                lbl_message.Text = "경고: 각도 초과!";
-
-                lbl_okNg.BackColor = Color.Red;
-                lbl_okNg.ForeColor = Color.White;
-            }
-            else
+            if (angle >= 35 && angle <= 45)
             {
                 lbl_message.Text = "정상 동작";
 
                 lbl_okNg.BackColor = Color.Green;
+                lbl_okNg.ForeColor = Color.White;
+            }
+            else if (angle < 35)
+            {
+                lbl_message.Text = "각도 낮음";
+
+                lbl_okNg.BackColor = Color.Yellow;
+                lbl_okNg.ForeColor = Color.White;
+            }
+            else
+            {
+                lbl_message.Text = "경고: 각도 초과!";
+
+                lbl_okNg.BackColor = Color.Red;
                 lbl_okNg.ForeColor = Color.White;
             }
         }
@@ -661,7 +683,13 @@ namespace Incline
                             vinNo = result[3];
                             model = result[4];
 
-                            lbl_currentVehicle.Text = vinNo;
+                            // 서버에서 Rx 값을 받아도 바로 검사 진행하지 않고, 먼저 DB에 저장 후 나중에 사용자가 선택해서 검사할 수 있도록 함
+                            db.SaveMeasurementDataToMDB(
+                                acceptNo: acceptNo,
+                                vinNo: vinNo,
+                                model: model);
+
+                            // lbl_currentVehicle.Text = vinNo;
 
                             Console.WriteLine($"REG 수신된 데이터: {data}");
                         }
@@ -803,10 +831,17 @@ namespace Incline
             lbl_arcGaugeValue.Text = "0.0";
             lbl_incAngle.Text = "0.0";
 
+            lbl_ioBoardComm.ForeColor = Color.Green;
+            lbl_sensorComm.ForeColor = Color.Green;
+
             currentValue = 0.0f;
 
             InitializeArcGauge();
             panel_arcGauge.Invalidate();
+
+            ConnectIOBoard("COM11");
+            ConnectSensor("COM12");
+            LiftOffSignal();
         }
 
         private void btn_liftUp_MouseDown(object sender, MouseEventArgs e)
@@ -886,12 +921,13 @@ namespace Incline
                 Debug.WriteLine($"TCP 연결 종료 중 오류: {ex.Message}");
             }
 
+            commActivityTimer?.Stop();
+            commActivityTimer?.Dispose();
             ioTimer?.Dispose();
         }
 
         private void btn_close_Click(object sender, EventArgs e)
         {
-            DisconnectIOBoard();
             this.Close();
         }
 
@@ -918,8 +954,6 @@ namespace Incline
         //"#READ"
         private void btn_inspectionStart_Click(object sender, EventArgs e)
         {
-            double angle;
-
             vinNo = lbl_currentVehicle.Text;
 
             if (ioBoard.IsConnected == false)
@@ -934,10 +968,8 @@ namespace Incline
                     if (ValidateVinNo(vinNo))
                     {
                         lbl_currentVehicle.Text = vinNo;
-                        inspectionStatus = true; // 검사 끝날때로 옮겨야 함
 
                         SendInclineDataToServer();
-                        meaDate = DateTime.Now;
                     }
                     else
                     {
@@ -958,7 +990,7 @@ namespace Incline
 
             if (double.TryParse(text, out angle))
             {
-                if (angle <= maxInclineAngle)
+                if (angle >= 35 && angle <= 45)
                 {
                     lbl_message.Text = "검사 합격";
 
@@ -973,10 +1005,12 @@ namespace Incline
         {
             try
             {
-                okNg = confirmOkNg(); 
-
                 if (acceptNo != "" && vinNo != "")
                 {
+                    okNg = confirmOkNg();
+                    inspectionStatus = true;
+                    meaDate = DateTime.Now;
+
                     db.SaveMeasurementDataToMDB(acceptNo, vinNo, model, okNg, inspectionStatus, meaDate);
                 }
                 else
@@ -1009,6 +1043,19 @@ namespace Incline
         {
             isBackgroundInitialized = false;
             panel_arcGauge.Invalidate();
+        }
+
+        private void btn_allPause_Click(object sender, EventArgs e)
+        {
+            currentOutputState = 0;
+            ioBoard.SetOutputStatus(0);
+
+            ioBoard.Disconnect();
+        }
+
+        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            LiftOffSignal();
         }
     }
 }

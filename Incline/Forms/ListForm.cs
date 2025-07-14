@@ -9,12 +9,15 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
+
 namespace Incline.Forms
 {
     public partial class ListForm : Form
     {
         public string SelectedVinNo { get; private set; }
         private SettingDb db;
+        private Form1 parent;
 
         private string acceptNo;
         private string vinNo;
@@ -30,6 +33,7 @@ namespace Incline.Forms
         {
             InitializeComponent();
             this.db = db;
+            this.parent = parent;
             this.Load += ListForm_Load;
         }
 
@@ -204,13 +208,29 @@ namespace Incline.Forms
         {
             if (dataGridView1.SelectedRows.Count > 0)
             {
-                SelectedVinNo = dataGridView1.SelectedRows[0].Cells[1].Value.ToString();
+                int rowIndex = dataGridView1.SelectedRows[0].Index;
+
+                string acceptNo = dataGridView1.Rows[rowIndex].Cells["Column1"].Value?.ToString() ?? "";
+                string vinNo = dataGridView1.Rows[rowIndex].Cells["Column2"].Value?.ToString() ?? "";
+                string model = dataGridView1.Rows[rowIndex].Cells["Column3"].Value?.ToString() ?? "";
+
+                if (parent != null)
+                {
+                    parent.acceptNo = acceptNo;
+                    parent.vinNo = vinNo;
+                    parent.model = model;
+
+                    parent.lbl_currentVehicle.Text = vinNo;
+                }
+
+                this.SelectedVinNo = vinNo;
+
                 this.DialogResult = DialogResult.OK;
                 this.Close();
             }
             else
             {
-                MessageBox.Show("선택된 차량이 없습니다.", "알림", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("선택된 차량이 없습니다. 행을 선택해주세요.", "선택 오류", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
@@ -218,7 +238,21 @@ namespace Incline.Forms
         {
             if (e.RowIndex >= 0)
             {
-                SelectedVinNo = dataGridView1.Rows[e.RowIndex].Cells[1].Value.ToString();
+                string acceptNo = dataGridView1.Rows[e.RowIndex].Cells["Column1"].Value?.ToString() ?? "";
+                string vinNo = dataGridView1.Rows[e.RowIndex].Cells["Column2"].Value?.ToString() ?? "";
+                string model = dataGridView1.Rows[e.RowIndex].Cells["Column3"].Value?.ToString() ?? "";
+
+                if (parent != null)
+                {
+                    parent.acceptNo = acceptNo;
+                    parent.vinNo = vinNo;
+                    parent.model = model;
+
+                    parent.lbl_currentVehicle.Text = vinNo;
+                } 
+
+                this.SelectedVinNo = vinNo;
+
                 this.DialogResult = DialogResult.OK;
                 this.Close();
             }

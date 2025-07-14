@@ -15,6 +15,9 @@ namespace Incline
         private SerialPort serialPort;
         public bool isConnected { get; private set; }
 
+        private Timer communicationTimer;
+        private const int DEFAULT_POLLING_INTERVAL = 100;
+
         private const byte STX = 0x02;
         private const byte ETX = 0x03;
         private const byte CMD_INPUT = 0x33;
@@ -27,7 +30,22 @@ namespace Incline
         public delegate void OutputDataHandler(byte outputData, bool success);
         public event OutputDataHandler onOutputDataSent;
 
-        private Timer txTimer;
+        public IoBoard()
+        {
+            InitializeTimer();
+        }
+
+        private void InitializeTimer()
+        {
+            communicationTimer = new Timer();
+            communicationTimer.Interval = DEFAULT_POLLING_INTERVAL;
+            communicationTimer.Tick += communicationTimer_Tick;
+        }
+
+        private void communicationTimer_Tick(object sender, EventArgs e)
+        {
+            RequestInputStatus();
+        }
 
         public bool Connect(string portName, int baudRate = 9600)
         {
@@ -46,7 +64,7 @@ namespace Incline
                 serialPort.Open();
                 isConnected = true;
 
-                MessageBox.Show("보드에 연결되었습니다.", "연결 성공", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                communicationTimer.Start();
 
                 return true;
             }
@@ -60,12 +78,22 @@ namespace Incline
 
         public void Disconnect()
         {
+            communicationTimer.Stop();
+
             if (serialPort != null && serialPort.IsOpen)
             {
                 serialPort.DataReceived -= SerialPort_DataReceived;
                 serialPort.Close();
                 serialPort.Dispose();
                 isConnected = false;
+            }
+        }
+
+        public void SetPollingInterval(int milliseconds)
+        {
+            if (milliseconds > 0)
+            {
+                communicationTimer.Interval = milliseconds;
             }
         }
 
@@ -163,16 +191,40 @@ namespace Incline
                     {
                         HandlerFirstInputActive();
                     }
+                    else if ((inputData & 0x02) != 0)
+                    {
+                        HandlerSecondInputActive();
+                    }
+                    else
+                    {
+                        HandlerAllInputsInactive();
+                    }
                 }
             }
         }
 
         private void HandlerFirstInputActive()
         {
-            byte outputValue = 0x0B;
+            byte outputValue = 0x0B;  // 0, 1, 3번 출력 활성화 (0000 1011)
 
             SetOutputStatus(outputValue);
-            Debug.WriteLine("첫 번째 입력 신호 감지: 0, 1, 3번 출력 활성화");
+            Debug.WriteLine("0번 입력 신호 감지: 0, 1, 3번 출력 활성화");
+        }
+
+        private void HandlerSecondInputActive()
+        {
+            byte outputValue = 0x0D;  // 0, 2, 3번 출력 활성화 (0000 1101)
+
+            SetOutputStatus(outputValue);
+            Debug.WriteLine("1번 입력 신호 감지: 0, 2, 3번 출력 활성화");
+        }
+
+        private void HandlerAllInputsInactive()
+        {
+            byte outputValue = 0x00;  // 모든 출력 비활성화 (0000 0000)
+
+            SetOutputStatus(outputValue);
+            Debug.WriteLine("입력 신호 없음: 모든 출력 비활성화");
         }
     }
 }

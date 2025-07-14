@@ -62,8 +62,6 @@ namespace Incline
                 serialPort.Open();
                 isConnected = true;
 
-                MessageBox.Show("센서에 연결되었습니다.", "연결 성공", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
                 return true;
             }
             catch (Exception ex)
@@ -186,10 +184,7 @@ namespace Incline
 
                     RxData rxData = new RxData(packet);
 
-                    if (rxData.IsValid)
-                    {
-                        OnRxDataReceived?.Invoke(rxData);
-                    }
+                    OnRxDataReceived?.Invoke(rxData);
                 }
 
                 bufferPosition = 0;

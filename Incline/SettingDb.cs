@@ -144,7 +144,7 @@ namespace Incline
                             }
                         }
                     }
-                }
+                 }
 
                 MessageBox.Show("측정 데이터가 성공적으로 저장되었습니다.", "저장 완료", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }

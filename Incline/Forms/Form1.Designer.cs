@@ -51,6 +51,9 @@
             this.label1 = new System.Windows.Forms.Label();
             this.btn_liftDown = new System.Windows.Forms.Button();
             this.btn_io = new System.Windows.Forms.Button();
+            this.lbl_ioBoardComm = new System.Windows.Forms.Label();
+            this.lbl_sensorComm = new System.Windows.Forms.Label();
+            this.btn_allPause = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // lbl_message
@@ -268,11 +271,48 @@
             this.btn_io.UseVisualStyleBackColor = false;
             this.btn_io.Click += new System.EventHandler(this.btn_io_Click);
             // 
+            // lbl_ioBoardComm
+            // 
+            this.lbl_ioBoardComm.Font = new System.Drawing.Font("굴림", 24F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.lbl_ioBoardComm.Location = new System.Drawing.Point(61, 9);
+            this.lbl_ioBoardComm.Name = "lbl_ioBoardComm";
+            this.lbl_ioBoardComm.Size = new System.Drawing.Size(170, 68);
+            this.lbl_ioBoardComm.TabIndex = 34;
+            this.lbl_ioBoardComm.Text = "IoBoard";
+            this.lbl_ioBoardComm.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // lbl_sensorComm
+            // 
+            this.lbl_sensorComm.Font = new System.Drawing.Font("굴림", 24F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.lbl_sensorComm.Location = new System.Drawing.Point(264, 9);
+            this.lbl_sensorComm.Name = "lbl_sensorComm";
+            this.lbl_sensorComm.Size = new System.Drawing.Size(170, 68);
+            this.lbl_sensorComm.TabIndex = 35;
+            this.lbl_sensorComm.Text = "Sensor";
+            this.lbl_sensorComm.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // btn_allPause
+            // 
+            this.btn_allPause.BackColor = System.Drawing.Color.Silver;
+            this.btn_allPause.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btn_allPause.Font = new System.Drawing.Font("굴림", 22.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.btn_allPause.Location = new System.Drawing.Point(554, 902);
+            this.btn_allPause.Name = "btn_allPause";
+            this.btn_allPause.Size = new System.Drawing.Size(240, 93);
+            this.btn_allPause.TabIndex = 36;
+            this.btn_allPause.Text = "정  지";
+            this.btn_allPause.UseVisualStyleBackColor = false;
+            this.btn_allPause.Visible = false;
+            this.btn_allPause.Click += new System.EventHandler(this.btn_allPause_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1924, 1055);
+            this.Controls.Add(this.btn_allPause);
+            this.Controls.Add(this.lbl_sensorComm);
+            this.Controls.Add(this.lbl_ioBoardComm);
             this.Controls.Add(this.btn_io);
             this.Controls.Add(this.btn_liftDown);
             this.Controls.Add(this.label1);
@@ -296,6 +336,7 @@
             this.Name = "Form1";
             this.Text = "KI&T Incliner";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);
 
@@ -316,11 +357,14 @@
         private System.Windows.Forms.Button btn_config;
         private System.Windows.Forms.Button btn_selectVehicle;
         private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.Label lbl_currentVehicle;
+        public System.Windows.Forms.Label lbl_currentVehicle;
         private System.Windows.Forms.Button btn_inspectionStart;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button btn_liftDown;
         private System.Windows.Forms.Button btn_io;
+        private System.Windows.Forms.Label lbl_ioBoardComm;
+        private System.Windows.Forms.Label lbl_sensorComm;
+        private System.Windows.Forms.Button btn_allPause;
     }
 }
 
