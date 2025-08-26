@@ -298,6 +298,7 @@ namespace Incline
                     new PointF(centerX + (float)(Math.Cos(endRadians) * outerRadius), centerY - (float)(Math.Sin(endRadians) * outerRadius)),
                     new PointF(centerX + (float)(Math.Cos(startRadians) * outerRadius), centerY - (float)(Math.Sin(startRadians) * outerRadius))
                 };
+
                 g.FillPolygon(new SolidBrush(segmentColor), points);
             }
 
@@ -344,6 +345,7 @@ namespace Incline
         private void DrawBackgroundOnce()
         {
             if (isBackgroundInitialized) return;
+
             using (Graphics g = Graphics.FromImage(backgroundImage))
             {
                 g.SmoothingMode = SmoothingMode.AntiAlias;
@@ -361,6 +363,7 @@ namespace Incline
                 float horizontalLineY = centerY;
                 g.DrawLine(new Pen(Color.Black, 4), centerX - radius, horizontalLineY, centerX, horizontalLineY);
             }
+
             isBackgroundInitialized = true;
         }
 
