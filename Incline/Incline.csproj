@@ -59,7 +59,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Comm\TcpServer.cs" />
     <Compile Include="Forms\IoBoardForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -67,6 +66,8 @@
       <DependentUpon>IoBoardForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Models\Packet.cs" />
+    <Compile Include="Models\InclineMeasurement.cs" />
+    <Compile Include="Comm\InclineTcpClient.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -82,11 +83,11 @@
     <Compile Include="Forms\ConfigForm.Designer.cs">
       <DependentUpon>ConfigForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\Form1.cs">
+    <Compile Include="Forms\Incline.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="Forms\Incline.Designer.cs">
+      <DependentUpon>Incline.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\ListForm.cs">
       <SubType>Form</SubType>
@@ -101,8 +102,8 @@
     <EmbeddedResource Include="Forms\ConfigForm.resx">
       <DependentUpon>ConfigForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\Form1.resx">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <EmbeddedResource Include="Forms\Incline.resx">
+      <DependentUpon>Incline.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\IoBoardForm.resx">
       <DependentUpon>IoBoardForm.cs</DependentUpon>

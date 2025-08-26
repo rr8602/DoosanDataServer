@@ -14,7 +14,7 @@ namespace Incline.Forms
 {
     public partial class ConfigForm : Form
     {
-        private Form1 mainForm;
+        private Incline mainForm;
 
         public ConfigForm()
         {
@@ -22,7 +22,7 @@ namespace Incline.Forms
             this.AutoScaleMode = AutoScaleMode.None;
         }
 
-        public ConfigForm(Form1 mainForm) : this()
+        public ConfigForm(Incline mainForm) : this()
         {
             this.mainForm = mainForm;
         }
@@ -94,6 +94,11 @@ namespace Incline.Forms
         private void btn_apply_Click(object sender, EventArgs e)
         {
             SaveIniSettings();
+
+            if (mainForm != null)
+            {
+                mainForm.ReloadSettingsAndRedrawGauge();
+            }
         }
 
         private void btn_close_Click(object sender, EventArgs e)

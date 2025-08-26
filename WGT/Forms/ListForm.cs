@@ -7,6 +7,7 @@ using System.Data.OleDb;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -17,6 +18,16 @@ namespace WGT.Forms
     {
         public string SelectedAccpetNo { get; private set; }
         private SettingDb db;
+
+        private string acceptNo;
+        private double frontLeft;
+        private double frontRight;
+        private double frontTotal;
+        private double rearLeft;
+        private double rearRight;
+        private double rearTotal;
+        private double total;
+        private DateTime measurementDate;
 
         public ListForm(Form1 parent, SettingDb db)
         {
@@ -46,15 +57,14 @@ namespace WGT.Forms
 
                     string query = @"SELECT Accept_No, F_LW, F_RW, F_TW, 
                                     R_LW, R_RW, R_TW, Total_Weight, Mea_Date 
-                                    FROM MeasurementData 
+                                    FROM MeasurementData
                                     ORDER BY Mea_Date DESC";
-
 
                     using (OleDbCommand cmd = new OleDbCommand(query, con))
                     {
                         using (OleDbDataReader reader = cmd.ExecuteReader())
                         {
-                            DisplayData(reader);
+                            DisplayData(reader, onlyToday: true);
                         }
                     }
 
@@ -84,39 +94,46 @@ namespace WGT.Forms
         }
 
         // DataGridView에 표시
-        private void DisplayData(OleDbDataReader reader)
+        private void DisplayData(OleDbDataReader reader, bool onlyToday = false)
         {
             if (reader.HasRows)
             {
+                string todayDate = DateTime.Today.ToString("yyyyMMdd");
+
                 while (reader.Read())
                 {
-                    string acceptNo = reader["Accept_No"].ToString();
-                    double frontLeft = Convert.ToDouble(reader["F_LW"]);
-                    double frontRight = Convert.ToDouble(reader["F_RW"]);
-                    double frontTotal = Convert.ToDouble(reader["F_TW"]);
-                    double rearLeft = Convert.ToDouble(reader["R_LW"]);
-                    double rearRight = Convert.ToDouble(reader["R_RW"]);
-                    double rearTotal = Convert.ToDouble(reader["R_TW"]);
-                    double total = Convert.ToDouble(reader["Total_Weight"]);
-                    DateTime measurementDate = Convert.ToDateTime(reader["Mea_Date"]);
+                    acceptNo = reader["Accept_No"].ToString();
+                    frontLeft = Convert.ToDouble(reader["F_LW"]);
+                    frontRight = Convert.ToDouble(reader["F_RW"]);
+                    frontTotal = Convert.ToDouble(reader["F_TW"]);
+                    rearLeft = Convert.ToDouble(reader["R_LW"]);
+                    rearRight = Convert.ToDouble(reader["R_RW"]);
+                    rearTotal = Convert.ToDouble(reader["R_TW"]);
+                    total = Convert.ToDouble(reader["Total_Weight"]);
+                    measurementDate = Convert.ToDateTime(reader["Mea_Date"]);
 
-                    dataGridView1.Rows.Add(
-                        acceptNo,
-                        frontLeft.ToString("F1"),
-                        frontRight.ToString("F1"),
-                        frontTotal.ToString("F1"),
-                        rearLeft.ToString("F1"),
-                        rearRight.ToString("F1"),
-                        rearTotal.ToString("F1"),
-                        total.ToString("F1"),
-                        measurementDate.ToString("yyyy-MM-dd HH:mm:ss")
-                    );
+                    if (!onlyToday || (acceptNo.Length >= 8 && acceptNo.Substring(0, 8) == todayDate))
+                    {
+                        AddRowToGrid(acceptNo, frontLeft, frontRight, frontTotal, rearLeft, rearRight, rearTotal, total, measurementDate);
+                    }
                 }
             }
-            else
-            {
-                MessageBox.Show("검색 조건에 맞는 데이터가 없습니다.", "알림", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
+        }
+
+        private void AddRowToGrid(string acceptNo, double frontLeft, double frontRight, double frontTotal,
+                          double rearLeft, double rearRight, double rearTotal, double total, DateTime measurementDate)
+        {
+            dataGridView1.Rows.Add(
+                acceptNo,
+                frontLeft.ToString("F1"),
+                frontRight.ToString("F1"),
+                frontTotal.ToString("F1"),
+                rearLeft.ToString("F1"),
+                rearRight.ToString("F1"),
+                rearTotal.ToString("F1"),
+                total.ToString("F1"),
+                measurementDate.ToString("yyyy-MM-dd HH:mm:ss")
+            );
         }
 
         // 통합 검색 메서드 - 접수번호, 날짜, 또는 둘 모두를 기준으로 검색
@@ -146,10 +163,13 @@ namespace WGT.Forms
                     // 날짜 검색 조건 추가
                     if (startDate.HasValue && endDate.HasValue)
                     {
-                        query += " AND Mea_Date BETWEEN ? AND ?";
-                        parameters.Add(new OleDbParameter("@StartDate", OleDbType.Date) { Value = startDate.Value });
+                        query += " AND Left(Accept_No, 8) BETWEEN ? AND ?";
 
-                        parameters.Add(new OleDbParameter("@EndDate", OleDbType.Date) { Value = endDate.Value });
+                        string startDateStr = startDate.Value.ToString("yyyyMMdd");
+                        string endDateStr = endDate.Value.ToString("yyyyMMdd");
+
+                        parameters.Add(new OleDbParameter("@StartDate", OleDbType.VarChar) { Value = startDateStr });
+                        parameters.Add(new OleDbParameter("@EndDate", OleDbType.VarChar) { Value = endDateStr });
                     }
 
                     // 결과 정렬
@@ -165,7 +185,7 @@ namespace WGT.Forms
 
                         using (OleDbDataReader reader = cmd.ExecuteReader())
                         {
-                            DisplayData(reader);
+                            DisplayData(reader, onlyToday: false);
                         }
                     }
 

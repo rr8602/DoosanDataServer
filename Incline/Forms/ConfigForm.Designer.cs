@@ -260,7 +260,7 @@
             this.MinimizeBox = false;
             this.Name = "ConfigForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "ConfigForm";
+            this.Text = "설정";
             this.Load += new System.EventHandler(this.ConfigForm_Load);
             this.ResumeLayout(false);
             this.PerformLayout();

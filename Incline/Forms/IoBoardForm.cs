@@ -13,7 +13,7 @@ namespace Incline.Forms
 {
     public partial class IoBoardForm : Form
     {
-        private Form1 form;
+        private Incline form;
         private bool isOnOff = true;
 
         private const string LampNonePath = "..\\..\\Lamp-None.bmp";
@@ -27,7 +27,7 @@ namespace Incline.Forms
         private static Image ProcessedGreenImg = ChangeMagentaToLightYellow(GreenButtonImg);
         private static Image ProcessedNoneImg = ChangeMagentaToLightYellow(NoneButtonImg);
 
-        public IoBoardForm(Form1 parentForm)
+        public IoBoardForm(Incline parentForm)
         {
             InitializeComponent();
             this.form = parentForm;

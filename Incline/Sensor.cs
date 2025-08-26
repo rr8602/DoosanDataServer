@@ -85,7 +85,7 @@ namespace Incline
 
         public bool IsConnected => isConnected;
 
-        // Sensor 데이터 요청
+        // Sensor 데이터 요청 - 센서에 먼저 데이터 요청 해야함
         public bool SendCommand()
         {
             if (!isConnected || serialPort == null) return false;
@@ -116,6 +116,7 @@ namespace Incline
             }
         }
 
+        // Sensor 데이터 Read
         public void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
             try

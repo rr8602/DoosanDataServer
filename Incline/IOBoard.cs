@@ -12,7 +12,7 @@ namespace Incline
 {
     public class IoBoard
     {
-        private SerialPort serialPort;
+        public SerialPort serialPort;
         public bool isConnected { get; private set; }
 
         private Timer communicationTimer;
@@ -170,7 +170,7 @@ namespace Incline
 
                 ProcessReceivedData(buffer);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Debug.WriteLine($"데이터 수신 오류 : {ex.Message}");
             }
