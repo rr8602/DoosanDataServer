@@ -240,5 +240,25 @@ namespace Incline.Forms
             DateTimePicker dtp = (DateTimePicker)sender;
             dtp.CustomFormat = dtp.Checked ? "yyyy-MM-dd" : " ";
         }
+
+        private void btn_resend_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (dataGridView1.SelectedRows.Count > 0)
+                {
+                    int rowIndex = dataGridView1.SelectedRows[0].Index;
+
+                    string acceptNo = dataGridView1.Rows[rowIndex].Cells["Column1"].Value?.ToString() ?? "";
+                    double IncAngle = double.Parse(dataGridView1.Rows[rowIndex].Cells["Column4"].Value?.ToString() ?? "0.0");
+
+                    parent.SendInclineDataToServer(acceptNo, IncAngle);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("데이터 재전송 중 오류가 발생했습니다: " + ex.Message, "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
     }
 }

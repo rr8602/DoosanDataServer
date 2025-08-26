@@ -33,6 +33,8 @@ namespace Incline
             this.lbl_ioBoardComm = new System.Windows.Forms.Label();
             this.lbl_sensorComm = new System.Windows.Forms.Label();
             this.btn_inspectionCompelete = new System.Windows.Forms.Button();
+            this.label2 = new System.Windows.Forms.Label();
+            this.lbl_result = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // lbl_message
@@ -41,11 +43,10 @@ namespace Incline
             this.lbl_message.BackColor = System.Drawing.Color.Black;
             this.lbl_message.Font = new System.Drawing.Font("굴림", 36F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.lbl_message.ForeColor = System.Drawing.Color.Lime;
-            this.lbl_message.Location = new System.Drawing.Point(870, 100);
+            this.lbl_message.Location = new System.Drawing.Point(965, 100);
             this.lbl_message.Name = "lbl_message";
-            this.lbl_message.Size = new System.Drawing.Size(642, 298);
+            this.lbl_message.Size = new System.Drawing.Size(492, 186);
             this.lbl_message.TabIndex = 0;
-            this.lbl_message.Text = "label1";
             this.lbl_message.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // lbl_incAngle
@@ -54,11 +55,10 @@ namespace Incline
             this.lbl_incAngle.BackColor = System.Drawing.Color.Black;
             this.lbl_incAngle.Font = new System.Drawing.Font("굴림", 72F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.lbl_incAngle.ForeColor = System.Drawing.Color.Lime;
-            this.lbl_incAngle.Location = new System.Drawing.Point(870, 412);
+            this.lbl_incAngle.Location = new System.Drawing.Point(966, 303);
             this.lbl_incAngle.Name = "lbl_incAngle";
-            this.lbl_incAngle.Size = new System.Drawing.Size(642, 347);
+            this.lbl_incAngle.Size = new System.Drawing.Size(730, 531);
             this.lbl_incAngle.TabIndex = 2;
-            this.lbl_incAngle.Text = "label3";
             this.lbl_incAngle.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // panel_arcGauge
@@ -68,7 +68,7 @@ namespace Incline
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panel_arcGauge.Location = new System.Drawing.Point(40, 141);
             this.panel_arcGauge.Name = "panel_arcGauge";
-            this.panel_arcGauge.Size = new System.Drawing.Size(816, 543);
+            this.panel_arcGauge.Size = new System.Drawing.Size(904, 764);
             this.panel_arcGauge.TabIndex = 3;
             this.panel_arcGauge.Paint += new System.Windows.Forms.PaintEventHandler(this.panel_arcGauge_Paint);
             this.panel_arcGauge.Resize += new System.EventHandler(this.panel_arcGauge_Resize);
@@ -81,7 +81,7 @@ namespace Incline
             this.lbl_currentVehicle.ForeColor = System.Drawing.Color.Red;
             this.lbl_currentVehicle.Location = new System.Drawing.Point(455, 70);
             this.lbl_currentVehicle.Name = "lbl_currentVehicle";
-            this.lbl_currentVehicle.Size = new System.Drawing.Size(401, 62);
+            this.lbl_currentVehicle.Size = new System.Drawing.Size(489, 62);
             this.lbl_currentVehicle.TabIndex = 24;
             this.lbl_currentVehicle.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
@@ -91,9 +91,9 @@ namespace Incline
             this.lbl_title.BackColor = System.Drawing.Color.Silver;
             this.lbl_title.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.lbl_title.Font = new System.Drawing.Font("굴림", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.lbl_title.Location = new System.Drawing.Point(870, 70);
+            this.lbl_title.Location = new System.Drawing.Point(965, 70);
             this.lbl_title.Name = "lbl_title";
-            this.lbl_title.Size = new System.Drawing.Size(642, 29);
+            this.lbl_title.Size = new System.Drawing.Size(492, 29);
             this.lbl_title.TabIndex = 4;
             this.lbl_title.Text = "Message";
             this.lbl_title.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -104,9 +104,9 @@ namespace Incline
             this.btn_close.BackColor = System.Drawing.Color.Yellow;
             this.btn_close.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btn_close.Font = new System.Drawing.Font("굴림", 28.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.btn_close.Location = new System.Drawing.Point(1213, 765);
+            this.btn_close.Location = new System.Drawing.Point(1431, 1025);
             this.btn_close.Name = "btn_close";
-            this.btn_close.Size = new System.Drawing.Size(303, 93);
+            this.btn_close.Size = new System.Drawing.Size(265, 54);
             this.btn_close.TabIndex = 12;
             this.btn_close.Text = "닫  기";
             this.btn_close.UseVisualStyleBackColor = false;
@@ -118,9 +118,9 @@ namespace Incline
             this.btn_config.BackColor = System.Drawing.Color.Silver;
             this.btn_config.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btn_config.Font = new System.Drawing.Font("굴림", 28.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.btn_config.Location = new System.Drawing.Point(1213, 666);
+            this.btn_config.Location = new System.Drawing.Point(1431, 952);
             this.btn_config.Name = "btn_config";
-            this.btn_config.Size = new System.Drawing.Size(303, 93);
+            this.btn_config.Size = new System.Drawing.Size(265, 54);
             this.btn_config.TabIndex = 21;
             this.btn_config.Text = "설  정";
             this.btn_config.UseVisualStyleBackColor = false;
@@ -132,9 +132,9 @@ namespace Incline
             this.btn_selectVehicle.BackColor = System.Drawing.Color.Silver;
             this.btn_selectVehicle.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btn_selectVehicle.Font = new System.Drawing.Font("굴림", 28.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.btn_selectVehicle.Location = new System.Drawing.Point(874, 765);
+            this.btn_selectVehicle.Location = new System.Drawing.Point(1116, 1025);
             this.btn_selectVehicle.Name = "btn_selectVehicle";
-            this.btn_selectVehicle.Size = new System.Drawing.Size(333, 93);
+            this.btn_selectVehicle.Size = new System.Drawing.Size(295, 54);
             this.btn_selectVehicle.TabIndex = 22;
             this.btn_selectVehicle.Text = "차량 선택";
             this.btn_selectVehicle.UseVisualStyleBackColor = false;
@@ -157,7 +157,7 @@ namespace Incline
             this.btn_inspectionStart.BackColor = System.Drawing.Color.Silver;
             this.btn_inspectionStart.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btn_inspectionStart.Font = new System.Drawing.Font("굴림", 24F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.btn_inspectionStart.Location = new System.Drawing.Point(40, 759);
+            this.btn_inspectionStart.Location = new System.Drawing.Point(40, 980);
             this.btn_inspectionStart.Name = "btn_inspectionStart";
             this.btn_inspectionStart.Size = new System.Drawing.Size(239, 93);
             this.btn_inspectionStart.TabIndex = 27;
@@ -174,7 +174,7 @@ namespace Incline
             this.label1.Font = new System.Drawing.Font("굴림", 36F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.label1.Location = new System.Drawing.Point(0, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(1536, 68);
+            this.label1.Size = new System.Drawing.Size(1716, 68);
             this.label1.TabIndex = 28;
             this.label1.Text = "경 사 각 도  시 험 기";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -185,9 +185,9 @@ namespace Incline
             this.btn_io.BackColor = System.Drawing.Color.Silver;
             this.btn_io.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btn_io.Font = new System.Drawing.Font("굴림", 28.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.btn_io.Location = new System.Drawing.Point(874, 666);
+            this.btn_io.Location = new System.Drawing.Point(1116, 952);
             this.btn_io.Name = "btn_io";
-            this.btn_io.Size = new System.Drawing.Size(333, 93);
+            this.btn_io.Size = new System.Drawing.Size(295, 54);
             this.btn_io.TabIndex = 33;
             this.btn_io.Text = "I/O";
             this.btn_io.UseVisualStyleBackColor = false;
@@ -197,7 +197,7 @@ namespace Incline
             // 
             this.lbl_ioBoardComm.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.lbl_ioBoardComm.Font = new System.Drawing.Font("굴림", 24F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.lbl_ioBoardComm.Location = new System.Drawing.Point(-381, 0);
+            this.lbl_ioBoardComm.Location = new System.Drawing.Point(-201, 0);
             this.lbl_ioBoardComm.Name = "lbl_ioBoardComm";
             this.lbl_ioBoardComm.Size = new System.Drawing.Size(170, 68);
             this.lbl_ioBoardComm.TabIndex = 34;
@@ -208,7 +208,7 @@ namespace Incline
             // 
             this.lbl_sensorComm.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.lbl_sensorComm.Font = new System.Drawing.Font("굴림", 24F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.lbl_sensorComm.Location = new System.Drawing.Point(-205, 0);
+            this.lbl_sensorComm.Location = new System.Drawing.Point(-25, 0);
             this.lbl_sensorComm.Name = "lbl_sensorComm";
             this.lbl_sensorComm.Size = new System.Drawing.Size(170, 68);
             this.lbl_sensorComm.TabIndex = 35;
@@ -221,7 +221,7 @@ namespace Incline
             this.btn_inspectionCompelete.BackColor = System.Drawing.Color.Silver;
             this.btn_inspectionCompelete.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btn_inspectionCompelete.Font = new System.Drawing.Font("굴림", 24F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.btn_inspectionCompelete.Location = new System.Drawing.Point(285, 759);
+            this.btn_inspectionCompelete.Location = new System.Drawing.Point(285, 980);
             this.btn_inspectionCompelete.Name = "btn_inspectionCompelete";
             this.btn_inspectionCompelete.Size = new System.Drawing.Size(239, 93);
             this.btn_inspectionCompelete.TabIndex = 37;
@@ -229,11 +229,38 @@ namespace Incline
             this.btn_inspectionCompelete.UseVisualStyleBackColor = false;
             this.btn_inspectionCompelete.Click += new System.EventHandler(this.btn_inspectionCompelete_Click);
             // 
+            // label2
+            // 
+            this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.label2.BackColor = System.Drawing.Color.Silver;
+            this.label2.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.label2.Font = new System.Drawing.Font("굴림", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.label2.Location = new System.Drawing.Point(1480, 71);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(216, 29);
+            this.label2.TabIndex = 39;
+            this.label2.Text = "결과";
+            this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // lbl_result
+            // 
+            this.lbl_result.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.lbl_result.BackColor = System.Drawing.Color.Black;
+            this.lbl_result.Font = new System.Drawing.Font("굴림", 36F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.lbl_result.ForeColor = System.Drawing.Color.Lime;
+            this.lbl_result.Location = new System.Drawing.Point(1480, 101);
+            this.lbl_result.Name = "lbl_result";
+            this.lbl_result.Size = new System.Drawing.Size(216, 185);
+            this.lbl_result.TabIndex = 38;
+            this.lbl_result.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
             // Incline
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1536, 864);
+            this.ClientSize = new System.Drawing.Size(1716, 1085);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.lbl_result);
             this.Controls.Add(this.lbl_currentVehicle);
             this.Controls.Add(this.btn_inspectionCompelete);
             this.Controls.Add(this.lbl_sensorComm);
@@ -277,5 +304,7 @@ namespace Incline
         private System.Windows.Forms.Label lbl_ioBoardComm;
         private System.Windows.Forms.Label lbl_sensorComm;
         private System.Windows.Forms.Button btn_inspectionCompelete;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label lbl_result;
     }
 }

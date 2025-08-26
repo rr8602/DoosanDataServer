@@ -209,7 +209,7 @@ namespace Incline
             {
                 requestSent = false;
                 ioTimer.Start();
-                lbl_message.Text = "IO 보드 연결 성공";
+                lbl_message.Text = "IO 보드 연결\n성공";
             }
             else
             {
@@ -413,9 +413,9 @@ namespace Incline
             Console.WriteLine($"REG 수신된 데이터: AcceptNo={currentMeasurement.AcceptNo}, VinNo={currentMeasurement.VinNo}, Model={currentMeasurement.Model}");
         }
 
-        public void SendInclineDataToServer()
+        public void SendInclineDataToServer(string acceptNo, double data)
         {
-            string incData = string.Format(CultureInfo.InvariantCulture, "{0}/{1:F2}", currentMeasurement.AcceptNo, currentMeasurement.InclineAngle);
+            string incData = string.Format(CultureInfo.InvariantCulture, "{0}/{1:F2}", acceptNo, data);
             string packet = $"<RST/ANG/{incData}>";
             int dataCount = packet.Split('/').Length + 1;
             string packetResult = $"<RST/ANG/{incData}/{dataCount}>";
@@ -452,7 +452,7 @@ namespace Incline
 
         private void Incline_Load(object sender, EventArgs e)
         {
-            lbl_message.Text = "검사를 시작하려면\n검사시작 버튼을 눌러주세요.";
+            lbl_message.Text = "검사시작 버튼을 눌러주세요.";
             lbl_incAngle.Text = "0.0";
             lbl_ioBoardComm.ForeColor = Color.Green;
             lbl_sensorComm.ForeColor = Color.Green;
@@ -468,11 +468,6 @@ namespace Incline
             inclineTcpClient.LogMessage += (s, msg) => Console.WriteLine(msg);
             inclineTcpClient.Connect(ipAddress, portNumber);
         }
-
-        private void btn_liftUp_MouseDown(object sender, MouseEventArgs e) { if (ioBoard != null && ioBoard.IsConnected) LiftUpOnSignal(true); else MessageBox.Show("IO 보드가 연결되어 있지 않습니다.\n설정 메뉴에서 IO 보드를 먼저 연결해주세요.", "연결 오류", MessageBoxButtons.OK, MessageBoxIcon.Warning); }
-        private void btn_liftUp_MouseUp(object sender, MouseEventArgs e) { LiftOffSignal(); }
-        private void btn_liftDown_MouseDown(object sender, MouseEventArgs e) { if (ioBoard != null && ioBoard.IsConnected) LiftDownOnSignal(true); else MessageBox.Show("IO 보드가 연결되어 있지 않습니다.\n설정 메뉴에서 IO 보드를 먼저 연결해주세요.", "연결 오류", MessageBoxButtons.OK, MessageBoxIcon.Warning); }
-        private void btn_liftDown_MouseUp(object sender, MouseEventArgs e) { LiftOffSignal(); }
 
         private void btn_close_Click(object sender, EventArgs e)
         {
@@ -556,11 +551,17 @@ namespace Incline
                     currentMeasurement.MeaDate = DateTime.Now;
                     btn_inspectionStart.Enabled = true;
                     btn_inspectionCompelete.Enabled = false;
-                    lbl_message.Text = "검사가 종료 되었습니다. 차량을 이동하세요.";
+                    lbl_result.Text = currentMeasurement.InclineAngle.ToString("0.0");
+                    lbl_message.Text = "검사 종료. 차량 이동";
+
+                    if (currentMeasurement.OkNg)
+                        lbl_result.ForeColor = Color.Green;
+                    else
+                        lbl_result.ForeColor = Color.Red;
 
                     db.SaveMeasurementDataToMDB(currentMeasurement);
 
-                    SendInclineDataToServer();
+                    SendInclineDataToServer(currentMeasurement.AcceptNo, currentMeasurement.InclineAngle);
                 }
                 else
                 {

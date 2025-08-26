@@ -45,6 +45,7 @@
             this.Column6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column7 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.label1 = new System.Windows.Forms.Label();
+            this.btn_resend = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -205,11 +206,25 @@
             this.label1.Text = "차대번호";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
+            // btn_resend
+            // 
+            this.btn_resend.BackColor = System.Drawing.Color.Yellow;
+            this.btn_resend.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btn_resend.Font = new System.Drawing.Font("굴림", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.btn_resend.Location = new System.Drawing.Point(870, 85);
+            this.btn_resend.Name = "btn_resend";
+            this.btn_resend.Size = new System.Drawing.Size(125, 42);
+            this.btn_resend.TabIndex = 21;
+            this.btn_resend.Text = "재전송";
+            this.btn_resend.UseVisualStyleBackColor = false;
+            this.btn_resend.Click += new System.EventHandler(this.btn_resend_Click);
+            // 
             // ListForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1008, 621);
+            this.Controls.Add(this.btn_resend);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.dataGridView1);
             this.Controls.Add(this.btn_selectVehicle);
@@ -248,5 +263,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn Column5;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column6;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column7;
+        private System.Windows.Forms.Button btn_resend;
     }
 }
