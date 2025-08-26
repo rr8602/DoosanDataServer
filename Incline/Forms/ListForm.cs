@@ -235,12 +235,6 @@ namespace Incline.Forms
             }
         }
 
-        private void DateTimePicker_ValueChanged(object sender, EventArgs e)
-        {
-            DateTimePicker dtp = (DateTimePicker)sender;
-            dtp.CustomFormat = dtp.Checked ? "yyyy-MM-dd" : " ";
-        }
-
         private void btn_resend_Click(object sender, EventArgs e)
         {
             try
