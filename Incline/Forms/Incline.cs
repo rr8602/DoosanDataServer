@@ -253,8 +253,8 @@ namespace Incline
             }
             e.Graphics.DrawImage(backgroundImage, 0, 0);
 
-            int radius = (int)(panel_arcGauge.ClientSize.Width / 1.9);
-            int centerX = (panel_arcGauge.ClientSize.Width / 2) + 200;
+            int radius = (int)(panel_arcGauge.ClientSize.Width / 1.7);
+            int centerX = (panel_arcGauge.ClientSize.Width / 2) + 300;
             int centerY = panel_arcGauge.ClientSize.Height - 20;
 
             DrawPointer(e.Graphics, centerX, centerY, radius, currentValue);
@@ -262,8 +262,8 @@ namespace Incline
 
         private Rectangle UpdatePointer()
         {
-            int radius = (int)(panel_arcGauge.ClientSize.Width / 1.9);
-            int centerX = (panel_arcGauge.ClientSize.Width / 2) + 200;
+            int radius = (int)(panel_arcGauge.ClientSize.Width / 1.7);
+            int centerX = (panel_arcGauge.ClientSize.Width / 2) + 300;
             int centerY = panel_arcGauge.ClientSize.Height - 20;
             
             return new Rectangle(centerX - radius, centerY - radius, radius * 2, radius * 2);
@@ -351,8 +351,8 @@ namespace Incline
                 g.SmoothingMode = SmoothingMode.AntiAlias;
                 g.Clear(panel_arcGauge.BackColor);
 
-                int radius = (int)(panel_arcGauge.ClientSize.Width / 1.9);
-                int centerX = (panel_arcGauge.ClientSize.Width / 2) + 200;
+                int radius = (int)(panel_arcGauge.ClientSize.Width / 1.7);
+                int centerX = (panel_arcGauge.ClientSize.Width / 2) + 300;
                 int centerY = panel_arcGauge.ClientSize.Height - 20;
 
                 g.FillPie(Brushes.Ivory, centerX - radius, centerY - radius, radius * 2, radius * 2, 180, 90);
@@ -552,7 +552,7 @@ namespace Incline
                     btn_inspectionStart.Enabled = true;
                     btn_inspectionCompelete.Enabled = false;
                     lbl_result.Text = currentMeasurement.InclineAngle.ToString("0.0");
-                    lbl_message.Text = "검사 종료. 차량 이동";
+                    lbl_message.Text = "검사 종료 되었습니다.";
 
                     if (currentMeasurement.OkNg)
                         lbl_result.ForeColor = Color.Green;
