@@ -535,7 +535,7 @@ namespace Incline
             {
                 lbl_message.Text = "검사 합격";
                 return true;
-            }
+            }ㅇㄹ
 
             return false;
         }
